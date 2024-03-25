@@ -6,37 +6,28 @@ local colors = require'modules.colors'
 local Character = require'objects.Character'
 local Enemy = require'objects.Enemy'
 local Bullet = require'objects.Bullet'
-local Wall = require'objects.Wall'
 local Aim = require'objects.Aim'
 
-local walls_data = require'data.walls'
+local Air = require'tiles.Air'
 
 local M = {}
 M.__index = M
 
 local function new(_)
-    local walls = {}
-    local n, m = #walls_data, #walls_data[1]
-    local n2, m2 = math.floor(n / 2), math.floor(m / 2)
-    for i = 1, n do
-        for j = 1, m do
-            if walls_data[i][j] ~= 0 then
-                walls[#walls + 1] = Wall(Vec(i - n2, j - m2))
-            end
-        end
-    end
-
     local self = {
         aim = Aim(),
         character = Character(Vec(0, 0)),
         enemies = {Enemy(Vec(5, 5))},
-        walls = walls,
+        map = require'data.map',
         bullets = {
             character = {},
             enemies = {},
         },
         state = {
             debug = false,
+        },
+        timer = {
+            clean = timer.CoolDown(5),
         },
     }
 
@@ -52,14 +43,11 @@ function M:draw()
     love.graphics.translate(-self.character.pos.x, -self.character.pos.y)
     love.graphics.translate(-0.5, -0.5)
 
+    self.map:draw()
     self.character:draw()
 
     for _, enemy in ipairs(self.enemies) do
         enemy:draw()
-    end
-
-    for _, wall in ipairs(self.walls) do
-        wall:draw()
     end
 
     for _, bullet in ipairs(self.bullets.character) do
@@ -79,14 +67,11 @@ function M:draw()
 end
 
 function M:drawDebug()
+    self.map:drawDebug()
     self.character:collider():draw(colors.BLUE)
 
     for _, enemy in ipairs(self.enemies) do
         enemy:collider():draw(colors.RED)
-    end
-
-    for _, wall in ipairs(self.walls) do
-        wall:collider():draw(colors.GREEN)
     end
 
     for _, bullet in ipairs(self.bullets.character) do
@@ -122,6 +107,11 @@ function M:keydown()
 end
 
 function M:update(dt)
+    for _, timer in pairs(timer) do
+        timer:update(dt)
+    end
+
+    self.map:update(dt)
     self.character:update(dt)
 
     for _, enemy in ipairs(self.enemies) do
@@ -145,51 +135,68 @@ function M:update(dt)
     end
 
     -- Collision
+    self:clean()
+
     local col_character = {self.character:collider()}
-    local col_walls = {}
-    for i, wall in ipairs(self.walls) do
-        col_walls[i] = wall:collider()
-    end
+    local col_walls = self.map.matrixColliders(self.map.walls)
 
-    Collider.checkCollisionsNtoM(
-        col_character, col_walls,
-        function(i, j)
-            local character = self.character
-            local wall = self.walls[j]
+    for o, collisor in ipairs(col_character) do
+        Collider.checkCollisionsNear(
+            collisor, self.character.pos, col_walls, self.map.spawn,
+            function(i, j)
+                local character = self.character
+                local wall = self.map.walls[i][j]
 
-            local pos_wall = wall.pos
-            local pos_character = character.pos
-            local delta = pos_character - pos_wall
+                if getmetatable(wall) == Air then
+                    return
+                end
 
-            while character:collider():collision(wall:collider()) do
-                character.pos = character.pos + 0.05 * delta
+                local pos_wall = wall.pos
+                local pos_character = character.pos
+                local delta = pos_character - pos_wall
+
+                while character:collider():collision(wall:collider()) do
+                    character.pos = character.pos + 0.05 * delta
+                end
+
+                dbg.print('Character collided with wall ' .. j)
             end
-
-            dbg.print('Character collided with wall ' .. j)
-        end
-    )
+        )
+    end
 
     local col_enemies = {}
-    for i, enemy in ipairs(self.enemies) do
+    for _, enemy in ipairs(self.enemies) do
         col_enemies[#col_enemies + 1] = enemy:collider()
     end
-    Collider.checkCollisionsNtoM(
-        col_enemies, col_walls,
-        function(i, j)
-            local enemy = self.enemies[i]
-            local wall = self.walls[j]
 
-            local pos_wall = wall.pos
-            local pos_enemy = enemy.pos
-            local delta = pos_enemy - pos_wall
+    for o, collisor in ipairs(col_enemies) do
+        Collider.checkCollisionsNear(
+            collisor, self.enemies[o].pos, col_walls, self.map.spawn,
+            function(i, j)
+                local enemy = self.enemies[o]
+                local wall = self.map.walls[i][j]
 
-            while enemy:collider():collision(wall:collider()) do
-                enemy.pos = enemy.pos + 0.05 * delta
+                if getmetatable(wall) == Air then
+                    return
+                end
+
+                local pos_wall = wall.pos
+                local pos_enemy = enemy.pos
+                local delta = pos_enemy - pos_wall
+
+                while enemy:collider():collision(wall:collider()) do
+                    enemy.pos = enemy.pos + 0.05 * delta
+                end
+
+                dbg.print(('Enemy %d collided with wall %d'):format(i, j))
             end
+        )
+    end
+end
 
-            dbg.print(('Enemy %d collided with wall %d'):format(i, j))
-        end
-    )
+function M:clean()
+    self.timer.clean:clock(function()
+    end)
 end
 
 return M

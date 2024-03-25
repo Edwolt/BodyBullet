@@ -47,7 +47,7 @@ end
 --- If f returns break the iteration stops
 --- If f returns continue, look at the implementation to see what happens
 function M.checkCollisionsNtoN(list, f, ...)
-    dbg.print(('Chekinkg collision %d x %d = %d'):format(
+    dbg.print(('Checkinkg collision %d x %d = %d'):format(
         #list, #list, #list * #list
     ))
     for i = 1, #list do
@@ -77,7 +77,7 @@ end
 --- If f returns continue the iteration will stop checking collision with the
 --- current item of the list1
 function M.checkCollisionsNtoM(list1, list2, f, ...)
-    dbg.print(('Chekinkg collision %d x %d = %d'):format(
+    dbg.print(('Checkinkg collision %d x %d = %d'):format(
         #list1, #list2, #list1 * #list2
     ))
     for i = 1, #list1 do
@@ -88,6 +88,31 @@ function M.checkCollisionsNtoM(list1, list2, f, ...)
                     return
                 elseif res == 'continue' then
                     break
+                end
+            end
+        end
+    end
+end
+
+function M.checkCollisionsNear(object, object_pos, matrix, matrix_pos, f, ...)
+    local pos = object_pos + matrix_pos
+    local x, y = pos.x, pos.y
+    x, y = math.floor(x), math.floor(y)
+    local bx, by = math.max(1, x - 2), math.max(1, y - 2)
+    local ex, ey = math.min(#matrix, x + 2), math.min(#matrix[1], y + 2)
+
+    dbg.print(('Checking collision near 1 x (%d, %d) = %d'):format(
+        ex - bx, ey - by, (ex - bx) * (ey - by)
+    ))
+
+    for i = bx, ex do
+        for j = by, ey do
+            if matrix[i][j]:collision(object) then
+                local res = f(i, j, ...)
+                if res == 'break' then
+                    return
+                elseif res == 'continue' then
+                    return
                 end
             end
         end

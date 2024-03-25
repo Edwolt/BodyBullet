@@ -22,7 +22,7 @@ end
 
 function M.mousePosition()
     local x, y = love.mouse.getPosition()
-    x, y = SETTINGS.tranformation:inverseTransformPoint(x, y)
+    x, y = SETTINGS.TRANFORMATION:inverseTransformPoint(x, y)
     return M(x, y)
 end
 

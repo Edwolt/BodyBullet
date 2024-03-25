@@ -37,10 +37,10 @@ function love.load()
     -- Calculate tranformation
     local tranformation = love.math.newTransform()
     local screen_size = Vec.windowSize()
-    local tiles = 15
-    tranformation:scale(screen_size.x / tiles, screen_size.y / tiles)
-    tranformation:translate(tiles / 2, tiles / 2)
-    SETTINGS.tranformation = tranformation
+    local tiles = SETTINGS.TILES
+    TRANFORMATION:scale(screen_size.x / tiles, screen_size.y / tiles)
+    TRANFORMATION:translate(tiles / 2, tiles / 2)
+    SETTINGS.TRANFORMATION = TRANFORMATION
 
     -- Instatiate Game
     game = Game()
@@ -58,6 +58,7 @@ function love.draw()
 
     love.graphics.pop()
     dbg.log.exit'Draw'
+    dbg.print()
 end
 
 function love.update(dt)
@@ -68,4 +69,5 @@ function love.update(dt)
     game:update(dt)
 
     dbg.log.exit'Update'
+    dbg.print()
 end
