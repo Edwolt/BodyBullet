@@ -87,6 +87,7 @@ end
 
 function M:left(f, ...)
     if keyIsDown'left' or keyIsDown'a' then
+        dbg.inspect{f}
         f(...)
     end
 end
@@ -97,12 +98,24 @@ function M:right(f, ...)
     end
 end
 
-function M:shoot(f, ...)
-    if keyIsDown'space' or keyIsDown'w' then
-        self.cooldown.shoot:clock(function(...)
-            f(...)
-        end, ...)
+function M:down(f, ...)
+    if keyIsDown'down' or keyIsDown's' then
+        f(...)
     end
 end
+
+function M:up(f, ...)
+    if keyIsDown'up' or keyIsDown'w' then
+        f(...)
+    end
+end
+
+-- function M:shoot(f, ...)
+--     if keyIsDown'space' or keyIsDown'w' then
+--         self.cooldown.shoot:clock(function(...)
+--             f(...)
+--         end, ...)
+--     end
+-- end
 
 return M

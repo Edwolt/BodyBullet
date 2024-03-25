@@ -52,5 +52,5 @@ end
 function love.update(dt)
     Key:update(dt)
     game:keydown()
-    game.update(dt)
+    game:update(dt)
 end

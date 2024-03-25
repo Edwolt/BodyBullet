@@ -37,4 +37,7 @@ function M:draw(pos)
     love.graphics.pop()
 end
 
+function M:update(dt)
+end
+
 return M

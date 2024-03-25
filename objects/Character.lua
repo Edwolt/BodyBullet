@@ -1,4 +1,5 @@
 local colors = require'modules.color'
+local Vec = require'modules.Vec'
 
 local M = {
     _loaded = false,
@@ -15,6 +16,7 @@ M.__index = M
 local function new(_, pos)
     local self = {
         pos = pos,
+        vel = Vec(0, 0),
     }
 
     setmetatable(self, M)
@@ -44,6 +46,14 @@ function M:draw(pos)
     love.graphics.circle('fill', 0.15, -0.23, 0.10)
 
     love.graphics.pop()
+end
+
+function M:update(dt)
+    self.pos = self.pos + 10 * dt * self.vel
+end
+
+function M:move(vel)
+    self.vel = vel
 end
 
 return M
