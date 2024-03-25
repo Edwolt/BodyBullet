@@ -4,6 +4,7 @@ SETTINGS = {
     BULLET_COOLDOWN = 0.3,
 
     CHARACTER_VELOCITY = 10,
+    ENEMY_VELOCITY = 5,
     BULLET_VELOCITY = 15,
 
     -- To be set during load

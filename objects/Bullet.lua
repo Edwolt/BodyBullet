@@ -1,11 +1,15 @@
 local colors = require'modules.colors'
+local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
 
-local M = {}
+local M = {
+    SIZE = Vec(0.1, 0.1),
+}
 M.__index = M
 
-local function new(M, shooter_pos, target_pos, vel)
-    local direction = (target_pos - shooter_pos):versor()
+local function new(M, shooter_pos, direction, vel)
+    -- local direction = (target_pos - shooter_pos):versor()
+    direction = direction:versor()
     -- angle = math.asin(direction.y)
 
     if vel ~= nil then
@@ -55,7 +59,7 @@ function M:isAlive()
 end
 
 function M:collider()
-    return Collider(self.pos, self.SIZE)
+    return Collider(self.pos + Vec(0.5, 0.5) - self.SIZE / 2, self.SIZE)
 end
 
 return M

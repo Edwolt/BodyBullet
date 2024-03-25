@@ -50,4 +50,8 @@ function M:move(vel)
     self.vel = vel
 end
 
+function M:shoot(target_pos)
+    return Bullet(self.pos, target_pos - self.pos)
+end
+
 return M

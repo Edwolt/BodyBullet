@@ -1,14 +1,16 @@
 local colors = require'modules.colors'
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
+local Bullets = require'modules.Bullets'
 
 local M = {}
 M.__index = M
 
-local function new(_, pos)
+local function new(_, pos, vel)
     local self = {
         pos = pos,
-        vel = Vec(0, 0),
+        vel = vel or SETTINGS.ENEMY_VELOCITY,
+        dir = Vec(0, 0),
     }
 
     setmetatable(self, M)
@@ -22,32 +24,28 @@ function M:draw(pos)
 
     love.graphics.push()
     love.graphics.translate(pos.x, pos.y)
-    love.graphics.translate(0.5, 0.5)
+    love.graphics.rotate(math.acos(Vec(0, 1):dot(self.dir)))
 
     love.graphics.setColor(colors.BLACK)
-    love.graphics.circle('fill', 0, 0, 0.5)
-
-    love.graphics.setColor(colors.WHITE)
-    love.graphics.ellipse('fill', -0.15, -0.25, 0.15, 0.20)
-    love.graphics.ellipse('fill', 0.15, -0.25, 0.15, 0.20)
-
-    love.graphics.setColor(colors.BLACK)
-    love.graphics.circle('fill', -0.15, -0.23, 0.10)
-    love.graphics.circle('fill', 0.15, -0.23, 0.10)
+    love.graphics.polygon('fill', 0, 0, 0, 1, 1, 0.5)
 
     love.graphics.pop()
 end
 
 function M:update(dt)
-    self.pos = self.pos + dt * SETTINGS.CHARACTER_VELOCITY * self.vel
+    self.pos = self.pos + dt * self.vel * self.dir
 end
 
 function M:collider()
-    return Collider(self.pos, Vec(1, 1))
+    return Collider(Vec(1, 1))
 end
 
-function M:move(vel)
-    self.vel = vel
+function M:look_at(target_pos)
+    self.dir = (target_pos - self.pos):versor()
+end
+
+function M:shoot()
+    return Bullet(self.pos, self.dir)
 end
 
 return M

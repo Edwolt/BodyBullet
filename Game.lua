@@ -4,6 +4,7 @@ local Collider = require'modules.Collider'
 local colors = require'modules.colors'
 
 local Character = require'objects.Character'
+local Enemy = require'objects.Enemy'
 local Bullet = require'objects.Bullet'
 local Wall = require'objects.Wall'
 local Aim = require'objects.Aim'
@@ -19,7 +20,11 @@ local function new(_)
             Wall(Vec(0, 1)),
             Wall(Vec(1, 1)),
         },
-        bullets = {},
+        enemies = {Enemy(Vec(5, 5))},
+        bullets = {
+            character = {},
+            enemies = {},
+        },
         state = {
             debug = false,
         },
@@ -38,6 +43,11 @@ function M:draw()
     love.graphics.translate(-0.5, -0.5)
 
     self.character:draw()
+
+    for _, enemy in ipairs(self.enemies) do
+        enemy:draw()
+    end
+
     for _, wall in ipairs(self.walls) do
         wall:draw()
     end
@@ -58,8 +68,12 @@ end
 function M:drawDebug()
     self.character:collider():draw(colors.BLUE)
 
+    for _, enemy in ipairs(self.enemies) do
+        enemy:collider():draw(colors.RED)
+    end
+
     for _, wall in ipairs(self.walls) do
-        wall:collider():draw(colors.RED)
+        wall:collider():draw(colors.GREEN)
     end
 
     for _, bullet in ipairs(self.bullets) do
@@ -86,12 +100,18 @@ function M:keydown()
     self.character:move(dir:versor())
 
     Input:shoot(function(pos)
-        self.bullets[#self.bullets + 1] = Bullet( self.character.pos, pos)
+        self.bullets[#self.bullets + 1] = self.character.shoot(pos)
     end)
 end
 
 function M:update(dt)
     self.character:update(dt)
+
+    for _, enemy in ipairs(self.enemies) do
+        enemy:look_at(self.character.pos)
+        enemy:update(dt)
+    end
+
     for _, wall in ipairs(self.walls) do
         wall:update(dt)
     end
