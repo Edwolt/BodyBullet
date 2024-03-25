@@ -4,7 +4,7 @@ local Collider = require'modules.Collider'
 local colors = require'modules.colors'
 
 local Character = require'objects.Character'
-local Block = require'objects.Block'
+local Wall = require'objects.Wall'
 local Aim = require'objects.Aim'
 
 local M = {}
@@ -14,9 +14,9 @@ local function new(_)
     local self = {
         aim = Aim(),
         character = Character(Vec(0, 0)),
-        blocks = {
-            Block(Vec(0, 1)),
-            Block(Vec(1, 1)),
+        walls = {
+            Wall(Vec(0, 1)),
+            Wall(Vec(1, 1)),
         },
         state = {
             debug = false,
@@ -36,8 +36,8 @@ function M:draw()
     love.graphics.translate(-0.5, -0.5)
 
     self.character:draw()
-    for _, block in ipairs(self.blocks) do
-        block:draw()
+    for _, wall in ipairs(self.walls) do
+        wall:draw()
     end
 
     self.aim:draw(Vec.mousePosition())
@@ -51,8 +51,8 @@ end
 
 function M:drawDebug()
     self.character:collider():draw(colors.BLUE)
-    for _, block in ipairs(self.blocks) do
-        block:collider():draw(colors.RED)
+    for _, wall in ipairs(self.walls) do
+        wall:collider():draw(colors.RED)
     end
 end
 
@@ -81,29 +81,29 @@ end
 
 function M:update(dt)
     self.character:update(dt)
-    for _, block in ipairs(self.blocks) do
-        block:update(dt)
+    for _, wall in ipairs(self.walls) do
+        wall:update(dt)
     end
 
     -- Collision
     local col_character = {self.character:collider()}
-    local col_blocks = {}
-    for i, block in ipairs(self.blocks) do
-        col_blocks[i] = block:collider()
+    local col_walls = {}
+    for i, wall in ipairs(self.walls) do
+        col_walls[i] = wall:collider()
     end
 
     Collider.checkCollisionsNtoM(
-        col_character, col_blocks,
+        col_character, col_walls,
         function(_, j)
-            local pos_block = self.blocks[j].pos
+            local pos_wall = self.walls[j].pos
             local pos_character = self.character.pos
-            local delta = pos_character - pos_block
+            local delta = pos_character - pos_wall
 
-            while self.character:collider():collision(self.blocks[j]:collider()) do
+            while self.character:collider():collision(self.walls[j]:collider()) do
                 self.character.pos = self.character.pos + 0.05 * delta
             end
 
-            print('Collision with block ' .. j)
+            print('Collision with wall ' .. j)
         end
     )
 end
