@@ -4,6 +4,7 @@ local Collider = require'modules.Collider'
 local colors = require'modules.colors'
 
 local Character = require'objects.Character'
+local Bullet = require'objects.Bullet'
 local Wall = require'objects.Wall'
 local Aim = require'objects.Aim'
 
@@ -18,6 +19,7 @@ local function new(_)
             Wall(Vec(0, 1)),
             Wall(Vec(1, 1)),
         },
+        bullets = {},
         state = {
             debug = false,
         },
@@ -40,7 +42,11 @@ function M:draw()
         wall:draw()
     end
 
-    self.aim:draw(Vec.mousePosition())
+    for _, bullet in ipairs(self.bullets) do
+        bullet:draw()
+    end
+
+    self.aim:draw(self.character.pos + Vec.mousePosition())
 
     if self.state.debug then
         self:drawDebug()
@@ -51,8 +57,13 @@ end
 
 function M:drawDebug()
     self.character:collider():draw(colors.BLUE)
+
     for _, wall in ipairs(self.walls) do
         wall:collider():draw(colors.RED)
+    end
+
+    for _, bullet in ipairs(self.bullets) do
+        bullet:collider():draw(colors.RED)
     end
 end
 
@@ -74,8 +85,8 @@ function M:keydown()
     Input:up(function() dir.y = dir.y - 1 end)
     self.character:move(dir:versor())
 
-    Input:click(function(pos)
-        inspect{pos, 'pos'}
+    Input:shoot(function(pos)
+        self.bullets[#self.bullets + 1] = Bullet( self.character.pos, pos)
     end)
 end
 
@@ -83,6 +94,10 @@ function M:update(dt)
     self.character:update(dt)
     for _, wall in ipairs(self.walls) do
         wall:update(dt)
+    end
+
+    for _, bullet in ipairs(self.bullets) do
+        bullet:update(dt)
     end
 
     -- Collision

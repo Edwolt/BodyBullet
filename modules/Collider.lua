@@ -29,7 +29,8 @@ function M:draw(color)
     love.graphics.translate(self.pos.x, self.pos.y)
 
     love.graphics.setColor(color)
-    love.graphics.rectangle('fill', 0, 0, self.size.x, self.size.y)
+    love.graphics.setLineWidth(0.01)
+    love.graphics.rectangle('line', 0, 0, self.size.x, self.size.y)
 
     love.graphics.pop()
 end

@@ -20,7 +20,6 @@ local function new(_)
             debug = timer.CoolDown(SPECIALKEY_COOLDOWN),
             giveup = timer.CoolDown(SPECIALKEY_COOLDOWN),
             next = timer.CoolDown(SPECIALKEY_COOLDOWN),
-
             shoot = timer.CoolDown(BULLET_COOLDOWN),
         },
         shootPressed = false,
@@ -111,18 +110,12 @@ function M:up(f, ...)
     end
 end
 
-function M:click(f, ...)
+function M:shoot(f, ...)
     if love.mouse.isDown(1) then
-        f(Vec.mousePosition(), ...)
+        self.cooldown.shoot:clock(function(...)
+            f(Vec.mousePosition(), ...)
+        end, ...)
     end
 end
-
--- function M:shoot(f, ...)
---     if keyIsDown'space' or keyIsDown'w' then
---         self.cooldown.shoot:clock(function(...)
---             f(...)
---         end, ...)
---     end
--- end
 
 return M
