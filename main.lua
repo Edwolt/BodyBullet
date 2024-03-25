@@ -38,11 +38,15 @@ function love.load()
 end
 
 function love.draw()
+    love.graphics.push()
+
     screen_size = Vec.windowSize()
     local tiles = 15
     love.graphics.scale(screen_size.x / tiles, screen_size.y / tiles)
     love.graphics.translate(tiles / 2, tiles / 2)
     game:draw()
+
+    love.graphics.pop()
 end
 
 function love.update(dt)

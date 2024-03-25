@@ -6,8 +6,8 @@ local M = {
         if M._loaded then return end
         M._loaded = true
 
-        dbg.log.load'Character'
-        dbg.log.loaded'Character'
+        dbg.log.load'Block'
+        dbg.log.loaded'Block'
     end,
 }
 M.__index = M
@@ -30,18 +30,9 @@ function M:draw(pos)
 
     love.graphics.push()
     love.graphics.translate(pos.x, pos.y)
-    love.graphics.translate(0.5, 0.5)
 
     love.graphics.setColor(colors.BLACK)
-    love.graphics.circle('fill', 0, 0, 0.5)
-
-    love.graphics.setColor(colors.WHITE)
-    love.graphics.ellipse('fill', -0.15, -0.25, 0.15, 0.20)
-    love.graphics.ellipse('fill', 0.15, -0.25, 0.15, 0.20)
-
-    love.graphics.setColor(colors.BLACK)
-    love.graphics.circle('fill', -0.15, -0.23, 0.10)
-    love.graphics.circle('fill', 0.15, -0.23, 0.10)
+    love.graphics.rectangle('fill', 0, 0, 1, 1)
 
     love.graphics.pop()
 end

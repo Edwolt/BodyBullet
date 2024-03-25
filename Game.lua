@@ -2,6 +2,7 @@ local Key = SETTINGS.Key
 local Vec = require'modules.Vec'
 
 local Character = require'objects.Character'
+local Block = require'objects.Block'
 
 local M = {
     _loaded = false,
@@ -27,7 +28,11 @@ function M:draw()
     love.graphics.push()
 
     local character = Character(Vec(0, 0))
+    local block = Block(Vec(0, 1))
+    local block2 = Block(Vec(1, 1))
     character:draw()
+    block:draw()
+    block2:draw()
 
     love.graphics.pop()
 end
