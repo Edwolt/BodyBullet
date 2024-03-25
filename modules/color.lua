@@ -16,6 +16,6 @@
 -- return M
 
 return {
-    WHITE = {1, 1, 1},
+    WHITE = {0.8, 0.8, 0.8},
     BLACK = {0, 0, 0},
 }

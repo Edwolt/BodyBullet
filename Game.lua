@@ -1,4 +1,4 @@
-local Key = SETTINGS.Key
+local Input = SETTINGS.Input
 local Vec = require'modules.Vec'
 
 local Character = require'objects.Character'
@@ -35,6 +35,9 @@ setmetatable(M, {__call = new})
 
 function M:draw()
     love.graphics.push()
+    -- Centering camera
+    love.graphics.translate(-self.character.pos.x, -self.character.pos.y)
+    love.graphics.translate(-0.5, -0.5)
 
     self.character:draw()
     for _, block in ipairs(self.blocks) do
@@ -45,16 +48,16 @@ function M:draw()
 end
 
 function M:keydown()
-    Key:quit(function()
+    Input:quit(function()
         dbg.print'quit'
         love.event.quit(0)
     end)
 
     local dir = Vec(0, 0)
-    Key:right(function() dir.x = dir.x + 1 end)
-    Key:left(function() dir.x = dir.x - 1 end)
-    Key:down(function() dir.y = dir.y + 1 end)
-    Key:up(function() dir.y = dir.y - 1 end)
+    Input:right(function() dir.x = dir.x + 1 end)
+    Input:left(function() dir.x = dir.x - 1 end)
+    Input:down(function() dir.y = dir.y + 1 end)
+    Input:up(function() dir.y = dir.y - 1 end)
     self.character:move(dir:versor())
 end
 

@@ -1,7 +1,7 @@
-local Key = require'modules.Key'
+local Input = require'modules.Input'
 SETTINGS = {
 }
 
-SETTINGS.Key = Key()
+SETTINGS.Input = Input()
 
 return SETTINGS

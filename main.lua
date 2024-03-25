@@ -4,7 +4,7 @@ inspect = dbg.inspect
 require'SETTINGS'
 
 local Game = require'Game'
-local Key = SETTINGS.Key
+local Input = SETTINGS.Input
 
 local Vec = require'modules.Vec'
 local colors = require'modules.color'
@@ -50,7 +50,7 @@ function love.draw()
 end
 
 function love.update(dt)
-    Key:update(dt)
+    Input:update(dt)
     game:keydown()
     game:update(dt)
 end

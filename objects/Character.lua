@@ -28,8 +28,6 @@ setmetatable(M, {__call = new})
 function M:draw(pos)
     pos = pos or self.pos
 
-    dbg.inspect{self, 'self'}
-
     love.graphics.push()
     love.graphics.translate(pos.x, pos.y)
     love.graphics.translate(0.5, 0.5)

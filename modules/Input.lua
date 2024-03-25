@@ -87,7 +87,6 @@ end
 
 function M:left(f, ...)
     if keyIsDown'left' or keyIsDown'a' then
-        dbg.inspect{f}
         f(...)
     end
 end
