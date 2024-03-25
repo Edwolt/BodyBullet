@@ -2,6 +2,8 @@ local colors = require'modules.colors'
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
 
+local Bullet = require'objects.Bullet'
+
 local M = {}
 M.__index = M
 

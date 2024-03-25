@@ -1,7 +1,8 @@
 local colors = require'modules.colors'
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
-local Bullets = require'modules.Bullets'
+
+local Bullet = require'objects.Bullet'
 
 local M = {}
 M.__index = M
@@ -24,7 +25,19 @@ function M:draw(pos)
 
     love.graphics.push()
     love.graphics.translate(pos.x, pos.y)
-    love.graphics.rotate(math.acos(Vec(0, 1):dot(self.dir)))
+    love.graphics.translate(0.5, 0.5)
+    --love.graphics.rotate(math.acos(Vec(1, 0):dot(self.dir)))
+    local rotate = love.math.newTransform()
+    local cos = self.dir.x
+    local sin = self.dir.y
+    rotate:setMatrix(
+        cos, -sin, 0, 0,
+        sin, cos, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    )
+    love.graphics.applyTransform(rotate)
+    love.graphics.translate(-0.5, -0.5)
 
     love.graphics.setColor(colors.BLACK)
     love.graphics.polygon('fill', 0, 0, 0, 1, 1, 0.5)
@@ -37,7 +50,7 @@ function M:update(dt)
 end
 
 function M:collider()
-    return Collider(Vec(1, 1))
+    return Collider(self.pos, Vec(1, 1))
 end
 
 function M:look_at(target_pos)
@@ -46,6 +59,12 @@ end
 
 function M:shoot()
     return Bullet(self.pos, self.dir)
+end
+
+function M:tryshoot(dt, evilness)
+    if love.math.random() < dt * evilness then
+        return self:shoot()
+    end
 end
 
 return M

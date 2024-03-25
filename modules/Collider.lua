@@ -50,7 +50,7 @@ function M.checkCollisionsNtoN(list, f, ...)
     for i = 1, #list do
         for j = i + 1, #list do
             if list[i]:collision(list[j]) then
-                local res = f(i, j, ...)
+                local res = f(i, j, list[i], list[j], ...)
                 if res == 'break' then
                     return
                 elseif res == 'continue' then

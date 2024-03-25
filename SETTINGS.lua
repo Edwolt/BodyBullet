@@ -7,6 +7,8 @@ SETTINGS = {
     ENEMY_VELOCITY = 5,
     BULLET_VELOCITY = 15,
 
+    EVILNESS = 0.5,
+
     -- To be set during load
     tranformation = nil,
 }

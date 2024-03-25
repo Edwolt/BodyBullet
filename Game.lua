@@ -52,7 +52,10 @@ function M:draw()
         wall:draw()
     end
 
-    for _, bullet in ipairs(self.bullets) do
+    for _, bullet in ipairs(self.bullets.character) do
+        bullet:draw()
+    end
+    for _, bullet in ipairs(self.bullets.enemies) do
         bullet:draw()
     end
 
@@ -76,7 +79,10 @@ function M:drawDebug()
         wall:collider():draw(colors.GREEN)
     end
 
-    for _, bullet in ipairs(self.bullets) do
+    for _, bullet in ipairs(self.bullets.character) do
+        bullet:collider():draw(colors.RED)
+    end
+    for _, bullet in ipairs(self.bullets.enemies) do
         bullet:collider():draw(colors.RED)
     end
 end
@@ -100,7 +106,8 @@ function M:keydown()
     self.character:move(dir:versor())
 
     Input:shoot(function(pos)
-        self.bullets[#self.bullets + 1] = self.character.shoot(pos)
+        self.bullets.character[#self.bullets.character + 1] =
+            self.character:shoot(pos)
     end)
 end
 
@@ -108,15 +115,22 @@ function M:update(dt)
     self.character:update(dt)
 
     for _, enemy in ipairs(self.enemies) do
-        enemy:look_at(self.character.pos)
+        enemy:look_at(self.character.pos + Vec(0.5, 0.5))
         enemy:update(dt)
+        local bullet = enemy:tryshoot(dt, SETTINGS.EVILNESS)
+        if bullet ~= nil then
+            self.bullets.enemies[#self.bullets.enemies + 1] = bullet
+        end
     end
 
     for _, wall in ipairs(self.walls) do
         wall:update(dt)
     end
 
-    for _, bullet in ipairs(self.bullets) do
+    for _, bullet in ipairs(self.bullets.character) do
+        bullet:update(dt)
+    end
+    for _, bullet in ipairs(self.bullets.enemies) do
         bullet:update(dt)
     end
 
@@ -129,16 +143,41 @@ function M:update(dt)
 
     Collider.checkCollisionsNtoM(
         col_character, col_walls,
-        function(_, j)
-            local pos_wall = self.walls[j].pos
-            local pos_character = self.character.pos
+        function(i, j)
+            local character = self.character
+            local wall = self.walls[j]
+
+            local pos_wall = wall.pos
+            local pos_character = character.pos
             local delta = pos_character - pos_wall
 
-            while self.character:collider():collision(self.walls[j]:collider()) do
-                self.character.pos = self.character.pos + 0.05 * delta
+            while character:collider():collision(wall:collider()) do
+                character.pos = character.pos + 0.05 * delta
             end
 
-            print('Collision with wall ' .. j)
+            dbg.print('Character collided with wall ' .. j)
+        end
+    )
+
+    local col_enemies = {}
+    for i, enemy in ipairs(self.enemies) do
+        col_enemies[#col_enemies + 1] = enemy:collider()
+    end
+    Collider.checkCollisionsNtoM(
+        col_enemies, col_walls,
+        function(i, j)
+            local enemy = self.enemies[i]
+            local wall = self.walls[j]
+
+            local pos_wall = wall.pos
+            local pos_enemy = enemy.pos
+            local delta = pos_enemy - pos_wall
+
+            while enemy:collider():collision(wall:collider()) do
+                enemy.pos = enemy.pos + 0.05 * delta
+            end
+
+            dbg.print(('Enemy %d collided with wall %d'):format(i, j))
         end
     )
 end
