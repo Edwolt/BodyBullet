@@ -50,16 +50,22 @@ function love.load()
 end
 
 function love.draw()
+    dbg.log.enter'Draw'
     love.graphics.push()
     love.graphics.replaceTransform(SETTINGS.tranformation)
 
     game:draw()
 
     love.graphics.pop()
+    dbg.log.exit'Draw'
 end
 
 function love.update(dt)
+    dbg.log.enter'Update'
+
     Input:update(dt)
     game:keydown()
     game:update(dt)
+
+    dbg.log.exit'Update'
 end

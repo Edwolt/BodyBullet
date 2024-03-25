@@ -9,18 +9,28 @@ local Bullet = require'objects.Bullet'
 local Wall = require'objects.Wall'
 local Aim = require'objects.Aim'
 
+local walls_data = require'data.walls'
+
 local M = {}
 M.__index = M
 
 local function new(_)
+    local walls = {}
+    local n, m = #walls_data, #walls_data[1]
+    local n2, m2 = math.floor(n / 2), math.floor(m / 2)
+    for i = 1, n do
+        for j = 1, m do
+            if walls_data[i][j] ~= 0 then
+                walls[#walls + 1] = Wall(Vec(i - n2, j - m2))
+            end
+        end
+    end
+
     local self = {
         aim = Aim(),
         character = Character(Vec(0, 0)),
-        walls = {
-            Wall(Vec(0, 1)),
-            Wall(Vec(1, 1)),
-        },
         enemies = {Enemy(Vec(5, 5))},
+        walls = walls,
         bullets = {
             character = {},
             enemies = {},
@@ -123,9 +133,9 @@ function M:update(dt)
         end
     end
 
-    for _, wall in ipairs(self.walls) do
-        wall:update(dt)
-    end
+    -- for _, wall in ipairs(self.walls) do
+    --     wall:update(dt)
+    -- end
 
     for _, bullet in ipairs(self.bullets.character) do
         bullet:update(dt)

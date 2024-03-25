@@ -47,6 +47,9 @@ end
 --- If f returns break the iteration stops
 --- If f returns continue, look at the implementation to see what happens
 function M.checkCollisionsNtoN(list, f, ...)
+    dbg.print(('Chekinkg collision %d x %d = %d'):format(
+        #list, #list, #list * #list
+    ))
     for i = 1, #list do
         for j = i + 1, #list do
             if list[i]:collision(list[j]) then
@@ -74,6 +77,9 @@ end
 --- If f returns continue the iteration will stop checking collision with the
 --- current item of the list1
 function M.checkCollisionsNtoM(list1, list2, f, ...)
+    dbg.print(('Chekinkg collision %d x %d = %d'):format(
+        #list1, #list2, #list1 * #list2
+    ))
     for i = 1, #list1 do
         for j = 1, #list2 do
             if list1[i]:collision(list2[j]) then

@@ -12,6 +12,7 @@ local function new(_, pos, vel)
         pos = pos,
         vel = vel or SETTINGS.ENEMY_VELOCITY,
         dir = Vec(0, 0),
+        health = 5,
     }
 
     setmetatable(self, M)

@@ -11,6 +11,7 @@ local function new(_, pos)
     local self = {
         pos = pos,
         vel = Vec(0, 0),
+        health = 10,
     }
 
     setmetatable(self, M)
