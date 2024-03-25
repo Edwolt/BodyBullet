@@ -1,16 +1,8 @@
-local colors = require'modules.color'
+local colors = require'modules.colors'
 local Vec = require'modules.Vec'
+local Collider = require'modules.Collider'
 
-local M = {
-    _loaded = false,
-    load = function(M)
-        if M._loaded then return end
-        M._loaded = true
-
-        dbg.log.load'Character'
-        dbg.log.loaded'Character'
-    end,
-}
+local M = {}
 M.__index = M
 
 local function new(_, pos)
@@ -48,6 +40,10 @@ end
 
 function M:update(dt)
     self.pos = self.pos + 10 * dt * self.vel
+end
+
+function M:collider()
+    return Collider(self.pos, Vec(1, 1))
 end
 
 function M:move(vel)

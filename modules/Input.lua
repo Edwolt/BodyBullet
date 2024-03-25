@@ -1,7 +1,9 @@
---- Module to manage Keyboard inputs
+--- Module to manage Keyboard and Mouse inputs
 
 local keyIsDown = love.keyboard.isDown
 local timer = require'modules.timer'
+
+local Vec = require'modules.Vec'
 
 
 M = {}
@@ -52,7 +54,7 @@ function M:fullscreen(f, ...)
 end
 
 function M:debug(f, ...)
-    if keyIsDown'c' then
+    if keyIsDown'kp5' then
         self.cooldown.debug:clock(function(...)
             f(...)
         end, ...)
@@ -106,6 +108,12 @@ end
 function M:up(f, ...)
     if keyIsDown'up' or keyIsDown'w' then
         f(...)
+    end
+end
+
+function M:click(f, ...)
+    if love.mouse.isDown(1) then
+        f(Vec.mousePosition(), ...)
     end
 end
 

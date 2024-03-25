@@ -20,6 +20,12 @@ function M.windowSize()
     )
 end
 
+function M.mousePosition()
+    local x, y = love.mouse.getPosition()
+    x, y = SETTINGS.tranformation:inverseTransformPoint(x, y)
+    return M(x, y)
+end
+
 --- Returns Vec with the size of the image sprite as the components
 function M.imageSize(sprite)
     return M(
@@ -110,7 +116,7 @@ function M.__sub(a, b)
 end
 
 function M.__unm(a)
-    return M( -a.x, -a.y)
+    return M(-a.x, -a.y)
 end
 
 function M.__mul(a, b)
@@ -152,14 +158,6 @@ end
 
 function M.__tostring(vec)
     return string.format('(x=%d, y=%d)', vec.x, vec.y)
-end
-
------ Misc Methods -----
---- Scale vector to the size of the screen
-function M:toscreen()
-    local SCALE = SETTINGS.SCALE()
-    local BLOCK_SIZE = SETTINGS.BLOCK_SIZE
-    return SCALE * BLOCK_SIZE * self
 end
 
 return M

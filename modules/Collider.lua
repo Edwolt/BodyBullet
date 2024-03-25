@@ -25,26 +25,23 @@ function M.collision(a, b)
 end
 
 function M:draw(color)
+    love.graphics.push()
+    love.graphics.translate(self.pos.x, self.pos.y)
+
     love.graphics.setColor(color)
+    love.graphics.rectangle('fill', 0, 0, self.size.x, self.size.y)
 
-    local screen_pos = self.pos:toscreen()
-    local screen_size = self.size:toscreen()
-
-    love.graphics.rectangle(
-        'line',
-        screen_pos.x, screen_pos.y,
-        screen_size.x, screen_size.y
-    )
+    love.graphics.pop()
 end
 
 --- Check collision of all against all of list
 --- list must be a list of Colliders
 ---
---- This function will iterate over the list checking if there are 
+--- This function will iterate over the list checking if there are
 --- collision between its elements
---- 
+---
 --- For every collision,
---- f will be executed with the indices of the collisors as parameters 
+--- f will be executed with the indices of the collisors as parameters
 ---
 --- If f returns break the iteration stops
 --- If f returns continue, look at the implementation to see what happens
@@ -66,11 +63,11 @@ end
 --- Check collision of list1 against list2
 --- list1 and list2 must be a list of Colliders
 ---
---- This function will iterate over the lists checking if there are 
+--- This function will iterate over the lists checking if there are
 --- collisions between colliders of list1 and colliders of list2
---- 
+---
 --- For every collision,
---- f will be executed with the indices of the collisors as parameters 
+--- f will be executed with the indices of the collisors as parameters
 ---
 --- If f returns break the iteration stops
 --- If f returns continue the iteration will stop checking collision with the

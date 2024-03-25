@@ -7,7 +7,7 @@ local Game = require'Game'
 local Input = SETTINGS.Input
 
 local Vec = require'modules.Vec'
-local colors = require'modules.color'
+local colors = require'modules.colors'
 
 local game
 
@@ -17,6 +17,7 @@ function love.load()
     dbg.inspect{SETTINGS, 'SETTINGS'}
 
     dbg.log.load'main'
+    -- Configure Lua
     love.graphics.setDefaultFilter('nearest', 'nearest', 0)
     love.graphics.setBackgroundColor(colors.WHITE)
 
@@ -30,7 +31,18 @@ function love.load()
         }
     )
 
-    Game:load()
+    love.mouse.setGrabbed(true)
+    love.mouse.setVisible(false)
+
+    -- Calculate tranformation
+    local tranformation = love.math.newTransform()
+    local screen_size = Vec.windowSize()
+    local tiles = 15
+    tranformation:scale(screen_size.x / tiles, screen_size.y / tiles)
+    tranformation:translate(tiles / 2, tiles / 2)
+    SETTINGS.tranformation = tranformation
+
+    -- Instatiate Game
     game = Game()
 
     dbg.log.loaded'main'
@@ -39,11 +51,8 @@ end
 
 function love.draw()
     love.graphics.push()
+    love.graphics.replaceTransform(SETTINGS.tranformation)
 
-    screen_size = Vec.windowSize()
-    local tiles = 15
-    love.graphics.scale(screen_size.x / tiles, screen_size.y / tiles)
-    love.graphics.translate(tiles / 2, tiles / 2)
     game:draw()
 
     love.graphics.pop()
