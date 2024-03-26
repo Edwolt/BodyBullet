@@ -1,6 +1,7 @@
 local colors = require'modules.colors'
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
+local timer = require'modules.timer'
 
 local M = {
     SIZE = Vec(0.1, 0.1),
@@ -8,9 +9,7 @@ local M = {
 M.__index = M
 
 local function new(M, shooter_pos, direction, vel)
-    -- local direction = (target_pos - shooter_pos):versor()
     direction = direction:versor()
-    -- angle = math.asin(direction.y)
 
     if vel ~= nil then
         vel = direction * vel
@@ -22,8 +21,8 @@ local function new(M, shooter_pos, direction, vel)
     local self = {
         pos = shooter_pos,
         vel = vel,
-        angle = angle,
         health = 1, -- The health of the bullet is how much damage it causes
+        timer = timer.Timer(SETTINGS.BULLET_TIME_LIMIT),
     }
 
     setmetatable(self, M)
@@ -48,14 +47,24 @@ end
 
 function M:update(dt)
     self.pos = self.pos + dt * self.vel
+
+    self.timer:update(dt)
+    self.timer:clock(function()
+        self:kill()
+    end)
 end
 
-function M:damage()
-    self.health = self.health - 1
+function M:damage(val)
+    val = val or 1
+    self.health = self.health - val
 end
 
 function M:isAlive()
     return self.health > 0
+end
+
+function M:kill()
+    self.health = 0
 end
 
 function M:collider()

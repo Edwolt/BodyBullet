@@ -54,7 +54,18 @@ function M:move(vel)
 end
 
 function M:shoot(target_pos)
+    inspect{target_pos, 'target_pos'}
+    inspect{self.pos, 'self.pos'}
     return Bullet(self.pos, target_pos - self.pos)
+end
+
+function M:isAlive()
+    return self.health > 0
+end
+
+function M:damage(val)
+    val = val or 1
+    self.health = self.health - val
 end
 
 return M

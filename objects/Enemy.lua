@@ -22,6 +22,8 @@ setmetatable(M, {__call = new})
 
 
 function M:draw(pos)
+    if not self:isAlive() then return end
+
     pos = pos or self.pos
 
     love.graphics.push()
@@ -47,6 +49,7 @@ function M:draw(pos)
 end
 
 function M:update(dt)
+    if not self:isAlive() then return end
     self.pos = self.pos + dt * self.vel * self.dir
 end
 
@@ -59,13 +62,24 @@ function M:look_at(target_pos)
 end
 
 function M:shoot()
+    assert(self:isAlive())
     return Bullet(self.pos, self.dir)
 end
 
 function M:tryshoot(dt, evilness)
+    if not self:isAlive() then return end
     if love.math.random() < dt * evilness then
         return self:shoot()
     end
+end
+
+function M:damage(val)
+    val = val or 1
+    self.health = self.health - val
+end
+
+function M:isAlive()
+    return self.health > 0
 end
 
 return M

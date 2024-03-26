@@ -119,11 +119,12 @@ function M.checkCollisionsNear(object, object_pos, matrix, matrix_pos, f, ...)
     end
 end
 
---- Get the screen collider
---- (Testing collision with a object tells if it's on screen)
-function M.screenCollider()
-    local SCREEN_BLOCKS = SETTINGS.SCREEN_BLOCKS
-    return M(Vec(0, 0), SCREEN_BLOCKS)
+function M.getColliderList(list)
+    local res = {}
+    for _, obj in ipairs(list) do
+        res[#res + 1] = obj:collider()
+    end
+    return res
 end
 
 return M
