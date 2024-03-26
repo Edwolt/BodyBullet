@@ -11,16 +11,17 @@ M.__index = M
 
 local function new(_)
     local SPECIALKEY_COOLDOWN = SETTINGS.SPECIALKEY_COOLDOWN
-    local BULLET_COOLDOWN = SETTINGS.BULLET_COOLDOWN
+    local SHOOT_COOLDOWN = SETTINGS.SHOOT_COOLDOWN
+    local DASH_COOLDOWN = SETTINGS.DASH_COOLDOWN
 
     local self = {
         cooldown = {
-            pause = timer.CoolDown(SPECIALKEY_COOLDOWN),
             fullscreen = timer.CoolDown(SPECIALKEY_COOLDOWN),
             debug = timer.CoolDown(SPECIALKEY_COOLDOWN),
             giveup = timer.CoolDown(SPECIALKEY_COOLDOWN),
-            next = timer.CoolDown(SPECIALKEY_COOLDOWN),
-            shoot = timer.CoolDown(BULLET_COOLDOWN),
+
+            shoot = timer.CoolDown(SHOOT_COOLDOWN),
+            dash = timer.CoolDown(DASH_COOLDOWN),
         },
         shootPressed = false,
     }
@@ -61,23 +62,7 @@ function M:debug(f, ...)
 end
 
 function M:giveup(f, ...)
-    if keyIsDown'g' then
-        self.cooldown.giveup:clock(function(...)
-            f(...)
-        end, ...)
-    end
-end
-
-function M:next(f, ...)
-    if keyIsDown'n' then
-        self.cooldown.giveup:clock(function(...)
-            f(...)
-        end, ...)
-    end
-end
-
-function M:fast(f, ...)
-    if keyIsDown'p' then
+    if keyIsDown'r' then
         self.cooldown.giveup:clock(function(...)
             f(...)
         end, ...)
@@ -113,6 +98,14 @@ end
 function M:shoot(f, ...)
     if love.mouse.isDown(1) then
         self.cooldown.shoot:clock(function(...)
+            f(Vec.mousePosition(), ...)
+        end, ...)
+    end
+end
+
+function M:dash(f, ...)
+    if love.mouse.isDown(2) then
+        self.cooldown.dash:clock(function(...)
             f(Vec.mousePosition(), ...)
         end, ...)
     end

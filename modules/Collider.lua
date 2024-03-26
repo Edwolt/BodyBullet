@@ -35,6 +35,12 @@ function M:draw(color)
     love.graphics.pop()
 end
 
+function M:randomPoint()
+    local bx, by = self.pos:unpack()
+    local ex, ey = (self.pos + self.size):unpack()
+    return Vec(love.math.random(bx, ex), love.math.random(ey, by))
+end
+
 --- Check collision of all against all of list
 --- list must be a list of Colliders
 ---

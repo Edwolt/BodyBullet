@@ -68,6 +68,11 @@ function M:versor()
     return self / self:norm()
 end
 
+---- Util function -----
+function M:unpack()
+    return self.x, self.y
+end
+
 ------ Operators ------
 --- Operators will be broadcasted
 --- that's mean, for example, that u * v isn't cross or dot product

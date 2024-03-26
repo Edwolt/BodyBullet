@@ -14,17 +14,23 @@ local Air = require'tiles.Air'
 local M = {}
 M.__index = M
 
+-- Planned Levels
+-- [ ] Legs
+-- [ ] Stomach
+-- [ ] Heart (circulatory system)
+-- [ ] Brain
 local function new(_)
     local self = {
         aim = Aim(),
         character = Character(Vec(0, 0)),
-        enemies = {Enemy(Vec(5, 5))},
+        enemies = {},
         map = require'data.map',
         bullets = {
             character = {},
             enemies = {},
         },
         state = {
+            level = {'legs', enemies = 30},
             debug = false,
             gameover = false,
         },
@@ -68,6 +74,42 @@ function M:draw()
     love.graphics.pop()
 end
 
+function M:drawDistant()
+    love.graphics.push()
+
+    -- Centering camera
+    love.graphics.translate(0, 5)
+    love.graphics.scale(0.08, 0.08)
+
+
+    self.map:draw()
+    self.character:draw()
+
+    for _, enemy in ipairs(self.enemies) do
+        enemy:draw()
+    end
+
+    for _, bullet in ipairs(self.bullets.character) do
+        bullet:draw()
+    end
+    for _, bullet in ipairs(self.bullets.enemies) do
+        bullet:draw()
+    end
+
+    -- self.aim:draw(self.character.pos + Vec.mousePosition())
+
+    if self.state.debug then
+        self:drawDebug()
+    end
+
+    local legs = self.map.areas.legs
+    for _, col in ipairs(legs) do
+        col:draw(colors.RED)
+    end
+
+    love.graphics.pop()
+end
+
 function M:drawDebug()
     self.map:drawDebug()
     self.character:collider():draw(colors.BLUE)
@@ -93,6 +135,15 @@ function M:keydown()
     Input:debug(function()
         dbg.print'toggle debug'
         self.state.debug = not self.state.debug
+    end)
+
+    Input:fullscreen(function()
+        dbg.print'toggle fullscree'
+        love.window.setFullscreen(not love.window.getFullscreen())
+    end)
+
+    Input:giveup(function()
+        self.state.gameover = true
     end)
 
     local dir = Vec(0, 0)
@@ -142,7 +193,7 @@ function M:update(dt)
     -- Character x Walls
     local col_character = Collider.getColliderList{self.character}
     local col_walls = self.map.matrixColliders(self.map.walls)
-    for o, collisor in ipairs(col_character) do
+    for _, collisor in ipairs(col_character) do
         Collider.checkCollisionsNear(
             collisor, self.character.pos, col_walls, self.map.spawn,
             function(i, j)
@@ -247,6 +298,18 @@ function M:update(dt)
             enemy:damage(5)
         end
     )
+
+    dbg.checkCollisions('%d x %d <= %d', #col_enemies, #self.map.areas.legs)
+    for i, col_enemy in ipairs(col_enemies) do
+        local collide = false
+        for _, col_area in ipairs(self.map.areas.legs) do
+            if col_enemy:collide(area) then
+                collide = true
+                break
+            end
+        end
+        self.enemies[i].insideArea = collide
+    end
 
     if not self.character:isAlive() then
         self.state.gameover = true

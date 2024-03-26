@@ -28,6 +28,14 @@ return {
         exit = function(name)
             print(('> Exited %s'):format(name))
         end,
+
+        checkCollisions = function(str, ...)
+            local mul = 1
+            for _, i in ipairs{...} do
+                mul = i * mul
+            end
+            print(('* Checking Collision ' .. str):format(..., mul))
+        end,
     },
     inspect = function(opts)
         local value = opts[1]

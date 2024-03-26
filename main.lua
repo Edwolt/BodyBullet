@@ -8,6 +8,7 @@ local Input = SETTINGS.Input
 
 local Vec = require'modules.Vec'
 local colors = require'modules.colors'
+local Collider = require'modules.Collider'
 
 local game
 
@@ -54,7 +55,7 @@ function love.draw()
     love.graphics.push()
     love.graphics.replaceTransform(SETTINGS.TRANSFORMATION)
 
-    game:draw()
+    game:drawDistant()
 
     love.graphics.pop()
     dbg.log.exit'Draw'

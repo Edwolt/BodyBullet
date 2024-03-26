@@ -13,6 +13,7 @@ local function new(_, pos, vel)
         vel = vel or SETTINGS.ENEMY_VELOCITY,
         dir = Vec(0, 0),
         health = 5,
+        insideArea = true,
     }
 
     setmetatable(self, M)
@@ -31,8 +32,7 @@ function M:draw(pos)
     love.graphics.translate(0.5, 0.5)
     --love.graphics.rotate(math.acos(Vec(1, 0):dot(self.dir)))
     local rotate = love.math.newTransform()
-    local cos = self.dir.x
-    local sin = self.dir.y
+    local cos, sin = self.dir:unpack()
     rotate:setMatrix(
         cos, -sin, 0, 0,
         sin, cos, 0, 0,
@@ -50,7 +50,12 @@ end
 
 function M:update(dt)
     if not self:isAlive() then return end
-    self.pos = self.pos + dt * self.vel * self.dir
+
+    if self.insideArea then
+        self.pos = self.pos + dt * self.vel * self.dir
+    else
+        self.pos = self.pos - dt * self.vel * self.dir
+    end
 end
 
 function M:collider()
@@ -68,7 +73,8 @@ end
 
 function M:tryshoot(dt, evilness)
     if not self:isAlive() then return end
-    if love.math.random() < dt * evilness then
+    local value = love.math.random() -- Who wouldn't love math
+    if value < dt * evilness then
         return self:shoot()
     end
 end

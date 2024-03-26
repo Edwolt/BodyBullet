@@ -2,7 +2,9 @@ local Input = require'modules.Input'
 
 SETTINGS = {
     SPECIALKEY_COOLDOWN = 0.2,
-    BULLET_COOLDOWN = 0.3,
+    SHOOT_COOLDOWN = 0.3,
+    DASH_COOLDOWN = 3.0,
+    MUSCLE_TIMING = 1.0,
 
     CHARACTER_VELOCITY = 10,
     ENEMY_VELOCITY = 5,
