@@ -29,12 +29,18 @@ return {
             print(('> Exited %s'):format(name))
         end,
 
-        checkCollisions = function(str, ...)
+        collisions = function(name, str, ...)
+            local args = {...}
+
             local mul = 1
-            for _, i in ipairs{...} do
+            for _, i in ipairs(args) do
                 mul = i * mul
             end
-            print(('* Checking Collision ' .. str):format(..., mul))
+
+            args[#args + 1] = mul
+
+            local string = '* Checking Collision ' .. name .. ' ' .. str
+            print(string:format(unpack(args)))
         end,
     },
     inspect = function(opts)

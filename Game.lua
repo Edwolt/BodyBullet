@@ -30,7 +30,7 @@ local function new(_)
             enemies = {},
         },
         state = {
-            level = {'legs', enemies = 30},
+            level = {'legs', enemies_left = 30, max_enemies = 10},
             debug = false,
             gameover = false,
         },
@@ -299,7 +299,10 @@ function M:update(dt)
         end
     )
 
-    dbg.checkCollisions('%d x %d <= %d', #col_enemies, #self.map.areas.legs)
+    dbg.log.collisions(
+        'Custom', '%d x %d <= %d',
+        #col_enemies, #self.map.areas.legs
+    )
     for i, col_enemy in ipairs(col_enemies) do
         local collide = false
         for _, col_area in ipairs(self.map.areas.legs) do
@@ -313,6 +316,13 @@ function M:update(dt)
 
     if not self.character:isAlive() then
         self.state.gameover = true
+    end
+
+    while self.level.enemies_left > 0 and #self.enemies < self.levels.max_enemies do
+        local randidx = love.math.random(#self.map.areas.legs)
+        local randarea = self.map.areas.legs[randidx]
+
+        self.enemies[#self.enemies + 1] = Enemy(randarea:randomPoint())
     end
 end
 
