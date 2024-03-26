@@ -6,7 +6,7 @@ local colors = require'modules.colors'
 
 local Wall = require'tiles.Wall'
 local Air = require'tiles.Air'
-
+local Muscle = require'tiles.Muscle'
 
 local halfmap = require'data.halfmap'
 
@@ -22,28 +22,34 @@ end
 local n, m = #map, #map[1]
 local spawn = Vec(84.5, 154)
 
-local walls = {}
+local tiles = {}
 for i = 1, n do
-    walls[2 * i - 1] = {}
-    walls[2 * i] = {}
+    tiles[2 * i - 1] = {}
+    tiles[2 * i] = {}
     for j = 1, m do
-        if map[i][j] == 1 then
-            walls[2 * i - 1][2 * j - 1] = Wall(Vec(2 * i - 1, 2 * j - 1) - spawn)
-            walls[2 * i - 0][2 * j - 1] = Wall(Vec(2 * i - 0, 2 * j - 1) - spawn)
-            walls[2 * i - 1][2 * j - 0] = Wall(Vec(2 * i - 1, 2 * j - 0) - spawn)
-            walls[2 * i - 0][2 * j - 0] = Wall(Vec(2 * i - 0, 2 * j - 0) - spawn)
-        else
-            walls[2 * i - 1][2 * j - 1] = Air(Vec(2 * i - 1, 2 * j - 1) - spawn)
-            walls[2 * i - 0][2 * j - 1] = Air(Vec(2 * i - 0, 2 * j - 1) - spawn)
-            walls[2 * i - 1][2 * j - 0] = Air(Vec(2 * i - 1, 2 * j - 0) - spawn)
-            walls[2 * i - 0][2 * j - 0] = Air(Vec(2 * i - 0, 2 * j - 0) - spawn)
+        local Class
+        if map[i][j] == 0 then
+            Class = Air
+        elseif map[i][j] == 1 then
+            Class = Wall
+        elseif map[i][j] == 2 then
+            -- Muscle Down
+            Class = function(pos) return Muscle(pos, 'down') end
+        elseif map[i][j] == 3 then
+            -- Muscle Up
+            Class = function(pos) return Muscle(pos, 'up') end
         end
+
+        tiles[2 * i - 1][2 * j - 1] = Class(Vec(2 * i - 1, 2 * j - 1) - spawn)
+        tiles[2 * i - 0][2 * j - 1] = Class(Vec(2 * i - 0, 2 * j - 1) - spawn)
+        tiles[2 * i - 1][2 * j - 0] = Class(Vec(2 * i - 1, 2 * j - 0) - spawn)
+        tiles[2 * i - 0][2 * j - 0] = Class(Vec(2 * i - 0, 2 * j - 0) - spawn)
     end
 end
 
 local M = {
     spawn = spawn,
-    walls = walls,
+    tiles = tiles,
     levels = {
         legs = {
             enemies_left = 30,
@@ -57,25 +63,30 @@ local M = {
 
 function M:draw()
     dbg.log.enter'Map Draw'
-    for _, l in ipairs(self.walls) do
-        for _, wall in ipairs(l) do
-            wall:draw()
+    for _, l in ipairs(self.tiles) do
+        for _, tile in ipairs(l) do
+            tile:draw()
         end
     end
     dbg.log.exit'Map Draw'
 end
 
 function M:drawDebug()
-    for _, l in ipairs(self.walls) do
-        for _, wall in ipairs(l) do
-            if getmetatable(wall) ~= Air then
-                wall:collider():draw(colors.RED)
+    for _, l in ipairs(self.tiles) do
+        for _, tile in ipairs(l) do
+            if getmetatable(tile) ~= Air then
+                tile:collider():draw(colors.RED)
             end
         end
     end
 end
 
 function M:update(dt)
+    for _, l in ipairs(self.tiles) do
+        for _, tile in ipairs(l) do
+            tile:update(dt)
+        end
+    end
 end
 
 function M.matrixColliders(list)

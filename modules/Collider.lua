@@ -106,8 +106,6 @@ function M.checkCollisionsNear(object, object_pos, matrix, matrix_pos, f, ...)
     dbg.log.collisions('Near', '1 x (%d, %d) = %d', ex - bx, ey - by)
     for i = bx, ex do
         for j = by, ey do
-            inspect{object, 'obj'}
-            inspect{matrix[i][j], 'mat'}
             if matrix[i][j]:collision(object) then
                 local res = f(i, j, ...)
                 if res == 'break' then

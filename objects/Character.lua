@@ -54,8 +54,6 @@ function M:move(vel)
 end
 
 function M:shoot(target_pos)
-    inspect{target_pos, 'target_pos'}
-    inspect{self.pos, 'self.pos'}
     return Bullet(self.pos, target_pos - self.pos)
 end
 

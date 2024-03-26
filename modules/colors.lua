@@ -1,5 +1,3 @@
-local M = {}
-
 --- Get a hexadecimal number and return its color as a table
 local function hex(val)
     return {love.math.colorFromBytes(
@@ -10,10 +8,14 @@ local function hex(val)
 end
 
 M.fromHex = hex
-M.WHITE = hex(0xaaaaaa)
-M.BLACK = hex(0x000000)
-M.RED = hex(0xff0000)
-M.GREEN = hex(0x00ff00)
-M.BLUE = hex(0x0000ff)
 
-return M
+return {
+    fromHex = hex,
+
+    WHITE = hex(0xaaaaaa),
+    BLACK = hex(0x000000),
+    RED = hex(0xff0000),
+    GREEN = hex(0x00ff00),
+    BLUE = hex(0x0000ff),
+    YELLOW = hex(0xffff00),
+}

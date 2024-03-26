@@ -8,13 +8,18 @@ local timer = require'modules.timer'
 
 local Character = require'objects.Character'
 local Enemy = require'objects.Enemy'
-local Bullet = require'objects.Bullet'
 local Aim = require'objects.Aim'
 
-local Air = require'tiles.Air'
+local Wall = require'tiles.Wall'
 
 local M = {}
 M.__index = M
+
+-- State is shared between games
+local state = {
+    debug = false,
+    gameover = false,
+}
 
 -- Planned Levels
 -- [ ] Legs
@@ -31,16 +36,14 @@ local function new(_)
             character = {},
             enemies = {},
         },
-        state = {
-            debug = false,
-            gameover = false,
-        },
+        state = state,
         level_name = 'legs',
         timers = {
             clean = timer.Timer(SETTINGS.CLEAN_TIMING),
         },
     }
     self.level = clone(self.map.levels[self.level_name])
+    self.state.gameover = false
 
     setmetatable(self, M)
     return self
@@ -99,7 +102,7 @@ function M:drawDistant()
         bullet:draw()
     end
 
-    -- self.aim:draw(self.character.pos + Vec.mousePosition())
+    self.aim:draw(self.character.pos + Vec.mousePosition())
 
     if self.state.debug then
         self:drawDebug()
@@ -111,6 +114,8 @@ end
 
 function M:drawDebug()
     self.map:drawDebug()
+
+    self.aim:collider(self.character.pos):draw(colors.YELLOW)
     self.character:collider():draw(colors.BLUE)
 
     for _, area in ipairs(self.level.area) do
@@ -195,7 +200,7 @@ function M:update(dt)
 
     -- Character x Walls
     local col_character = Collider.getColliderList{self.character}
-    local col_walls = self.map.matrixColliders(self.map.walls)
+    local col_tiles = self.map.matrixColliders(self.map.tiles)
     local col_enemies = Collider.getColliderList(self.enemies)
     local col_character_bullets = Collider.getColliderList(
         self.bullets.character
@@ -205,19 +210,19 @@ function M:update(dt)
 
     for _, collisor in ipairs(col_character) do
         Collider.checkCollisionsNear(
-            collisor, self.character.pos, col_walls, self.map.spawn,
+            collisor, self.character.pos, col_tiles, self.map.spawn,
             function(i, j)
                 local character = self.character
-                local wall = self.map.walls[i][j]
+                local tile = self.map.tiles[i][j]
 
-                if getmetatable(wall) == Air then return end
+                if getmetatable(tile) ~= Wall then return end
 
-                local pos_wall = wall.pos
+                local pos_tile = tile.pos
                 local pos_character = character.pos
-                local delta = pos_character - pos_wall
+                local delta = pos_character - pos_tile
 
                 local iteration = 0
-                while character:collider():collision(wall:collider()) do
+                while character:collider():collision(tile:collider()) do
                     character.pos = character.pos + 0.05 * delta
                     iteration = iteration + 1
                     if iteration > 1000 then
@@ -233,20 +238,20 @@ function M:update(dt)
     -- Enemies x Walls
     for o, collisor in ipairs(col_enemies) do
         Collider.checkCollisionsNear(
-            collisor, self.enemies[o].pos, col_walls, self.map.spawn,
+            collisor, self.enemies[o].pos, col_tiles, self.map.spawn,
             function(i, j)
                 local enemy = self.enemies[o]
-                local wall = self.map.walls[i][j]
+                local tile = self.map.tiles[i][j]
 
-                if getmetatable(wall) == Air then return end
+                if getmetatable(tile) ~= Wall then return end
                 if not enemy:isAlive() then return end
 
-                local pos_wall = wall.pos
+                local pos_tile = tile.pos
                 local pos_enemy = enemy.pos
-                local delta = pos_enemy - pos_wall
+                local delta = pos_enemy - pos_tile
 
                 local iteration = 0
-                while enemy:collider():collision(wall:collider()) do
+                while enemy:collider():collision(tile:collider()) do
                     enemy.pos = enemy.pos + 0.05 * delta
                     iteration = iteration + 1
                     if iteration > 1000 then
@@ -262,12 +267,12 @@ function M:update(dt)
     -- Character Bullets x Walls
     for o, collisor in ipairs(col_character_bullets) do
         Collider.checkCollisionsNear(
-            collisor, self.bullets.character[o].pos, col_walls, self.map.spawn,
+            collisor, self.bullets.character[o].pos, col_tiles, self.map.spawn,
             function(i, j)
                 local bullet = self.bullets.character[o]
-                local wall = self.map.walls[i][j]
+                local tile = self.map.tiles[i][j]
 
-                if getmetatable(wall) == Air then return end
+                if getmetatable(tile) ~= Wall then return end
                 if not bullet:isAlive() then return end
 
                 bullet:kill()
@@ -278,12 +283,12 @@ function M:update(dt)
     -- Enemies Bullets x Walls
     for o, collisor in ipairs(col_enemies_bullets) do
         Collider.checkCollisionsNear(
-            collisor, self.bullets.enemies[o].pos, col_walls, self.map.spawn,
+            collisor, self.bullets.enemies[o].pos, col_tiles, self.map.spawn,
             function(i, j)
                 local bullet = self.bullets.enemies[o]
-                local wall = self.map.walls[i][j]
+                local tile = self.map.tiles[i][j]
 
-                if getmetatable(wall) == Air then return end
+                if getmetatable(tile) ~= Wall then return end
                 if not bullet:isAlive() then return end
 
                 bullet:kill()
@@ -294,7 +299,7 @@ function M:update(dt)
     -- Character x Enemies
     Collider.checkCollisionsNtoM(
         col_character, col_enemies,
-        function(i, j)
+        function(_, j)
             local character = self.character
             local enemy = self.enemies[j]
 
@@ -312,8 +317,6 @@ function M:update(dt)
     for i, col_enemy in ipairs(col_enemies) do
         local collide = false
         for _, col in ipairs(col_area) do
-            inspect{col_enemy, 'col_enemy'}
-            inspect{col, 'col_area'}
             if col_enemy:collision(col) then
                 collide = true
                 break
@@ -322,22 +325,19 @@ function M:update(dt)
         self.enemies[i].insideArea = collide
     end
 
-    if not self.character:isAlive() then
-        self.state.gameover = true
-    end
 
+    -- Spwaning enemies
     while self.level.enemies_left > 0 and #self.enemies < self.level.max_enemies do
         local randidx = love.math.random(#self.level.area)
         local randarea = self.level.area[randidx]
 
         local enemy = Enemy(randarea:randomPoint())
-        inspect{enemy}
         local collides = false
         Collider.checkCollisionsNear(
             enemy:collider(), enemy.pos,
-            col_walls, self.map.spawn,
+            col_tiles, self.map.spawn,
             function(i, j)
-                if getmetatable(self.map.walls[i][j]) ~= Air then
+                if getmetatable(self.map.tiles[i][j]) == Wall then
                     collides = true
                 end
             end
@@ -351,13 +351,13 @@ function M:update(dt)
         self.enemies[#self.enemies + 1] = enemy
     end
 
-    for i, enemy in ipairs(self.enemies) do
-        inspect{enemy, 'enemy' .. i}
+    if not self.character:isAlive() then
+        self.state.gameover = true
     end
 end
 
 function M:clean()
-    function cleanDead(list)
+    local function cleanDead(list)
         local res = {}
         for _, object in ipairs(list) do
             if object:isAlive() then
@@ -368,7 +368,6 @@ function M:clean()
     end
 
     self.timers.clean:clock(function()
-        local newBullets = {}
         self.bullets.character = cleanDead(self.bullets.character)
         self.bullets.enemies = cleanDead(self.bullets.enemies)
         self.enemies = cleanDead(self.enemies)

@@ -55,7 +55,7 @@ function love.draw()
     love.graphics.push()
     love.graphics.replaceTransform(SETTINGS.TRANSFORMATION)
 
-    game:drawDistant()
+    game:draw()
 
     love.graphics.pop()
     dbg.log.exit'Draw'

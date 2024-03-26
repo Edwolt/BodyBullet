@@ -1,5 +1,6 @@
-local colors = require'modules.colors'
 local Vec = require'modules.Vec'
+local Collider = require'modules.Collider'
+local colors = require'modules.colors'
 
 local M = {}
 M.__index = M
@@ -27,6 +28,15 @@ function M:draw(pos)
     love.graphics.rectangle('fill', 0.6, 0.45, 0.4, 0.1)
 
     love.graphics.pop()
+end
+
+function M:collider(pos)
+    assert(pos ~= nil)
+
+    local vec_tiles = Vec(SETTINGS.TILES, SETTINGS.TILES)
+
+    local p = pos - (vec_tiles / 2)
+    return Collider(p, vec_tiles)
 end
 
 function M:update(dt)
