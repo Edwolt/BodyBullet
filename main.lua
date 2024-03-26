@@ -75,3 +75,7 @@ function love.update(dt)
     dbg.log.exit'Update'
     dbg.print()
 end
+
+function love.conf(t)
+    t.version = '11.4'
+end
