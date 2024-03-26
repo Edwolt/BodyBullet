@@ -81,6 +81,10 @@ function CoolDown:clock(f, ...)
     end
 end
 
+function CoolDown:canTrigger()
+    return not self.active
+end
+
 ----- Span Timer -----
 local Span = {}
 Span.__index = Span
@@ -110,6 +114,10 @@ function Span:clock(f, ...)
     else
         self.active = false
     end
+end
+
+function Span:percentage()
+    return self.time / self.duration
 end
 
 ------

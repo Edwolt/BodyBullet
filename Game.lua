@@ -197,6 +197,10 @@ function M:keydown()
                 self.character:shoot(pos + self.character.pos)
         end)
     end
+
+    Input:dash(function(pos)
+        self.character:dash(pos + self.character.pos)
+    end)
 end
 
 function M:update(dt)
@@ -357,16 +361,18 @@ function M:update(dt)
     )
 
     -- Enemies Bullets x Character
-    Collider.checkCollisionsNtoM(
-        col_character, col_enemies_bullets,
-        function(_, j)
-            local character = self.character
-            local bullet = self.bullets.enemies[j]
+    if not self.character.dashing.happening then
+        Collider.checkCollisionsNtoM(
+            col_character, col_enemies_bullets,
+            function(_, j)
+                local character = self.character
+                local bullet = self.bullets.enemies[j]
 
-            character:damage()
-            bullet:damage()
-        end
-    )
+                character:damage()
+                bullet:damage()
+            end
+        )
+    end
 
     -- Character x Enemies
     Collider.checkCollisionsNtoM(
@@ -377,8 +383,10 @@ function M:update(dt)
 
             if not enemy:isAlive() then return end
 
-            character:damage(1)
-            enemy:damage(5)
+            if not self.character.dashing.happening then
+                character:damage(1)
+                enemy:damage(3)
+            end
         end
     )
 
