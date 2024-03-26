@@ -1,4 +1,4 @@
---- Watch
+----- Watch -----
 local Watch = {}
 Watch.__index = Watch
 
@@ -6,6 +6,7 @@ local function new(_)
     local self = {time = 0}
     return setmetatable(self, T)
 end
+setmetatable(Watch, {__call = new})
 
 function Watch:update(dt)
     self.time = self.time + dt
@@ -19,7 +20,7 @@ function Watch:decrease(value)
     self.time = self.time - value
 end
 
---- Interval Timer
+----- Interval Timer -----
 local Timer = {}
 Timer.__index = Timer
 
@@ -47,7 +48,7 @@ function Timer:clock(f, ...)
     end
 end
 
---- Cool Down Timer
+----- Cool Down Timer -----
 local CoolDown = {}
 CoolDown.__index = CoolDown
 
@@ -80,7 +81,7 @@ function CoolDown:clock(f, ...)
     end
 end
 
---- Span Timer
+----- Span Timer -----
 local Span = {}
 Span.__index = Span
 
@@ -111,12 +112,10 @@ function Span:clock(f, ...)
     end
 end
 
+------
 return {
-    Watch = Watch,
-    --- Interval Timer
-    Timer = Timer,
-    --- Cool Down Timer
-    CoolDown = CoolDown,
-    -- CountDown
-    Span = Span,
+    Watch = Watch,       -- Just Count the time
+    Timer = Timer,       -- Interval Timer
+    CoolDown = CoolDown, -- Cool Down Timer
+    Span = Span,         -- Active for a Period
 }

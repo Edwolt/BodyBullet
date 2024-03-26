@@ -22,7 +22,6 @@ local state = {
     gameover = false,
 }
 
-local stomach = Stomach()
 -- Planned Levels
 -- [X] Legs
 -- [ ] Stomach
@@ -30,21 +29,25 @@ local stomach = Stomach()
 -- [ ] Brain
 local function new(_)
     local self = {
+        map = require'data.map',
+        stomach = Stomach(),
+
         aim = Aim(),
         character = Character(Vec(0, 0)),
         enemies = {},
-        map = require'data.map',
         bullets = {
             character = {},
             enemies = {},
         },
-        state = state,
-        level_name = 'legs',
+
         timers = {
             clean = timer.Timer(SETTINGS.CLEAN_TIMING),
         },
+
+        state = state,
+        levelName = 'legs',
     }
-    self.level = self.map.levels[self.level_name]()
+    self.level = self.map.levels[self.levelName]()
     self.state.gameover = false
 
     return setmetatable(self, M)
@@ -76,6 +79,7 @@ function M:drawNear()
     love.graphics.translate(-self.character.pos.x, -self.character.pos.y)
     love.graphics.translate(-0.5, -0.5)
 
+    self.stomach:draw()
     self.map:draw()
     self.character:draw()
 
@@ -109,8 +113,7 @@ function M:drawDistant()
     -- love.graphics.translate(0, 5)
     -- love.graphics.scale(0.08, 0.08)
 
-
-    stomach:draw()
+    self.stomach:draw()
     self.map:drawDistant()
     self.character:draw()
 
@@ -280,8 +283,10 @@ function M:update(dt)
                     avoidWall(character, tile)
                     dbg.print('Character collided with wall ' .. j)
                 elseif meta == Muscle then
-                    muscleImpulse(character, tile)
-                    dbg.print('Character impulsioned by muscle ' .. j)
+                    if self:isCharacterInnerArea() then
+                        muscleImpulse(character, tile)
+                        dbg.print('Character impulsioned by muscle ' .. j)
+                    end
                 end
             end
         )
@@ -396,6 +401,10 @@ function M:update(dt)
     -- Spwaning enemies
     local l_enemies = self.level.enemies
     while l_enemies.i <= #l_enemies.list and #self.enemies < l_enemies.max do
+        if not self:isCharacterInnerArea() then
+            break
+        end
+
         local randidx = love.math.random(#self.level.area)
         local randarea = self.level.area[randidx]
 
@@ -423,6 +432,14 @@ function M:update(dt)
 
     if not self.character:isAlive() then
         self.state.gameover = true
+    end
+
+    if self:isLevelConcluded() then
+        if self.levelName == 'legs' then
+            self.character.health = 15
+            self.levelName = 'stomach'
+            self.level = self.map.levels[self.levelName]()
+        end
     end
 end
 

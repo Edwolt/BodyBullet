@@ -15,9 +15,9 @@ function M:draw(pos)
     pos = pos or self.pos
 
     love.graphics.setColor(colors.GRAY)
-    love.graphics.rectangle('fill', 3, -48, 8, 9)
-    love.graphics.rectangle('fill', -10, -40, 23, 15)
-    love.graphics.rectangle('fill', -20, -35, 10, 5)
+    -- love.graphics.rectangle('fill', 3, -48, 8, 9)
+    -- love.graphics.rectangle('fill', -10, -40, 23, 15)
+    -- love.graphics.rectangle('fill', -20, -35, 10, 5)
 
     love.graphics.setColor(colors.BLACK)
     local width_before = love.graphics.getLineWidth()

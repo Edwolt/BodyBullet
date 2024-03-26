@@ -1,6 +1,8 @@
 local clone = require'utils.clone'
 local CheckPoint = require'objects.CheckPoint'
 local Enemy = require'objects.Enemy'
+local SquareEnemy = require'objects.SquareEnemy'
+
 
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
@@ -79,8 +81,17 @@ local M = {
         end,
         stomach = function()
             return {
-                enemies_left = 30,
-                max_enemies = 10,
+                enemies = {
+                    i = 1,
+                    max = 10,
+                    list = repeatList(6, {Enemy, Enemy, Enemy, Enemy, SquareEnemy}),
+                },
+                area = {
+                    Collider(Vec(3, -48), Vec(8, 9)),
+                    Collider(Vec(-10, -40), Vec(23, 15)),
+                    Collider(Vec(-20, -35), Vec(10, 5)),
+                },
+                checkpoint = CheckPoint(Vec(4, -33)),
             }
         end,
     },
