@@ -44,9 +44,13 @@ end
 local M = {
     spawn = spawn,
     walls = walls,
-    areas = {
+    levels = {
         legs = {
-            Collider(Vec(-14, -11), Vec(29, 28)),
+            enemies_left = 30,
+            max_enemies = 10,
+            area = {
+                Collider(Vec(-14, -11), Vec(29, 28)),
+            },
         },
     },
 }
@@ -64,7 +68,9 @@ end
 function M:drawDebug()
     for _, l in ipairs(self.walls) do
         for _, wall in ipairs(l) do
-            wall:collider():draw(colors.RED)
+            if getmetatable(wall) ~= Air then
+                wall:collider():draw(colors.RED)
+            end
         end
     end
 end

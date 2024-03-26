@@ -95,7 +95,7 @@ function M.__add(a, b)
             a.y + b
         )
     else
-        error(string.format('invalid types %s + %s', type(a), type(b)))
+        error(('invalid types %s + %s'):format(type(a), type(b)))
     end
 end
 
@@ -116,7 +116,7 @@ function M.__sub(a, b)
             a.y - b
         )
     else
-        error(string.format('invalid types %s - %s', type(a), type(b)))
+        error(('invalid types %s - %s'):format(type(a), type(b)))
     end
 end
 
@@ -141,7 +141,7 @@ function M.__mul(a, b)
             a.y * b
         )
     else
-        error(string.format('invalid types %s * %s', type(a), type(b)))
+        error(('invalid types %s * %s'):format(type(a), type(b)))
     end
 end
 
@@ -157,12 +157,12 @@ function M.__div(a, b)
             a.y / b
         )
     else
-        error(string.format('invalid types %s / %s', type(a), type(b)))
+        error(('invalid types %s / %s'):format(type(a), type(b)))
     end
 end
 
 function M.__tostring(vec)
-    return string.format('(x=%d, y=%d)', vec.x, vec.y)
+    return ('(x=%d, y=%d)'):format(vec.x, vec.y)
 end
 
 return M

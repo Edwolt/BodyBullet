@@ -68,7 +68,11 @@ function M:kill()
 end
 
 function M:collider()
-    return Collider(self.pos + Vec(0.5, 0.5) - self.SIZE / 2, self.SIZE)
+    if self:isAlive() then
+        return Collider(self.pos + Vec(0.5, 0.5) - self.SIZE / 2, self.SIZE)
+    else
+        return Collider.NULL_COLLIDER
+    end
 end
 
 return M

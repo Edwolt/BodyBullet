@@ -59,7 +59,11 @@ function M:update(dt)
 end
 
 function M:collider()
-    return Collider(self.pos, Vec(1, 1))
+    if self:isAlive() then
+        return Collider(self.pos, Vec(1, 1))
+    else
+        return Collider.NULL_COLLIDER
+    end
 end
 
 function M:look_at(target_pos)

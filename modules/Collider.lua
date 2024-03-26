@@ -98,7 +98,7 @@ end
 
 function M.checkCollisionsNear(object, object_pos, matrix, matrix_pos, f, ...)
     local pos = object_pos + matrix_pos
-    local x, y = pos.x, pos.y
+    local x, y = pos:unpack()
     x, y = math.floor(x), math.floor(y)
     local bx, by = math.max(1, x - 2), math.max(1, y - 2)
     local ex, ey = math.min(#matrix, x + 2), math.min(#matrix[1], y + 2)
@@ -106,6 +106,8 @@ function M.checkCollisionsNear(object, object_pos, matrix, matrix_pos, f, ...)
     dbg.log.collisions('Near', '1 x (%d, %d) = %d', ex - bx, ey - by)
     for i = bx, ex do
         for j = by, ey do
+            inspect{object, 'obj'}
+            inspect{matrix[i][j], 'mat'}
             if matrix[i][j]:collision(object) then
                 local res = f(i, j, ...)
                 if res == 'break' then
@@ -125,5 +127,14 @@ function M.getColliderList(list)
     end
     return res
 end
+
+function M.__tostring(col)
+    return ('(x=%d, y=%d, sx=%d, sy=%d)'):format(
+        col.pos.x, col.pos.y,
+        col.size.x, col.size.y
+    )
+end
+
+M.NULL_COLLIDER = M(Vec(0, 0), Vec(0, 0))
 
 return M

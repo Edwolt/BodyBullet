@@ -39,16 +39,20 @@ return {
 
             args[#args + 1] = mul
 
-            local string = '* Checking Collision ' .. name .. ' ' .. str
-            print(string:format(unpack(args)))
+            local fmt = '* Checking Collision ' .. name .. ' ' .. str
+            print(fmt:format(unpack(args)))
         end,
     },
     inspect = function(opts)
         local value = opts[1]
         local name = opts[2] and opts[2] .. ' = ' or ''
         local show_meta = opts.meta or false
+        local meta = getmetatable(value)
 
-        if type(value) == 'table' then
+        local hastostring = type(value) ~= 'table' or
+            (meta ~= nil and meta.__tostring ~= nil)
+
+        if not hastostring then
             print(name .. '{')
 
             for ki, i in pairs(value) do
@@ -56,7 +60,6 @@ return {
             end
 
             if show_meta then
-                local meta = getmetatable(value)
                 for ki, i in pairs(meta) do
                     print((' $%s = %s'):format(tostring(ki), tostring(i)))
                 end

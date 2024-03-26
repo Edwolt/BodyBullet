@@ -1,3 +1,5 @@
+local clone = require'utils.clone'
+
 local Input = SETTINGS.Input
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
@@ -30,14 +32,15 @@ local function new(_)
             enemies = {},
         },
         state = {
-            level = {'legs', enemies_left = 30, max_enemies = 10},
             debug = false,
             gameover = false,
         },
+        level_name = 'legs',
         timers = {
-            clean = timer.CoolDown(5),
+            clean = timer.Timer(SETTINGS.CLEAN_TIMING),
         },
     }
+    self.level = clone(self.map.levels[self.level_name])
 
     setmetatable(self, M)
     return self
@@ -102,10 +105,6 @@ function M:drawDistant()
         self:drawDebug()
     end
 
-    local legs = self.map.areas.legs
-    for _, col in ipairs(legs) do
-        col:draw(colors.RED)
-    end
 
     love.graphics.pop()
 end
@@ -113,6 +112,10 @@ end
 function M:drawDebug()
     self.map:drawDebug()
     self.character:collider():draw(colors.BLUE)
+
+    for _, area in ipairs(self.level.area) do
+        area:draw(colors.GREEN)
+    end
 
     for _, enemy in ipairs(self.enemies) do
         enemy:collider():draw(colors.RED)
@@ -193,6 +196,13 @@ function M:update(dt)
     -- Character x Walls
     local col_character = Collider.getColliderList{self.character}
     local col_walls = self.map.matrixColliders(self.map.walls)
+    local col_enemies = Collider.getColliderList(self.enemies)
+    local col_character_bullets = Collider.getColliderList(
+        self.bullets.character
+    )
+    local col_enemies_bullets = Collider.getColliderList(self.bullets.enemies)
+    local col_area = self.level.area
+
     for _, collisor in ipairs(col_character) do
         Collider.checkCollisionsNear(
             collisor, self.character.pos, col_walls, self.map.spawn,
@@ -221,7 +231,6 @@ function M:update(dt)
     end
 
     -- Enemies x Walls
-    local col_enemies = Collider.getColliderList(self.enemies)
     for o, collisor in ipairs(col_enemies) do
         Collider.checkCollisionsNear(
             collisor, self.enemies[o].pos, col_walls, self.map.spawn,
@@ -251,8 +260,6 @@ function M:update(dt)
     end
 
     -- Character Bullets x Walls
-    local col_character_bullets = Collider.getColliderList(self.bullets
-        .character)
     for o, collisor in ipairs(col_character_bullets) do
         Collider.checkCollisionsNear(
             collisor, self.bullets.character[o].pos, col_walls, self.map.spawn,
@@ -269,7 +276,6 @@ function M:update(dt)
     end
 
     -- Enemies Bullets x Walls
-    local col_enemies_bullets = Collider.getColliderList(self.bullets.enemies)
     for o, collisor in ipairs(col_enemies_bullets) do
         Collider.checkCollisionsNear(
             collisor, self.bullets.enemies[o].pos, col_walls, self.map.spawn,
@@ -301,12 +307,14 @@ function M:update(dt)
 
     dbg.log.collisions(
         'Custom', '%d x %d <= %d',
-        #col_enemies, #self.map.areas.legs
+        #col_enemies, #self.level.area
     )
     for i, col_enemy in ipairs(col_enemies) do
         local collide = false
-        for _, col_area in ipairs(self.map.areas.legs) do
-            if col_enemy:collide(area) then
+        for _, col in ipairs(col_area) do
+            inspect{col_enemy, 'col_enemy'}
+            inspect{col, 'col_area'}
+            if col_enemy:collision(col) then
                 collide = true
                 break
             end
@@ -318,11 +326,33 @@ function M:update(dt)
         self.state.gameover = true
     end
 
-    while self.level.enemies_left > 0 and #self.enemies < self.levels.max_enemies do
-        local randidx = love.math.random(#self.map.areas.legs)
-        local randarea = self.map.areas.legs[randidx]
+    while self.level.enemies_left > 0 and #self.enemies < self.level.max_enemies do
+        local randidx = love.math.random(#self.level.area)
+        local randarea = self.level.area[randidx]
 
-        self.enemies[#self.enemies + 1] = Enemy(randarea:randomPoint())
+        local enemy = Enemy(randarea:randomPoint())
+        inspect{enemy}
+        local collides = false
+        Collider.checkCollisionsNear(
+            enemy:collider(), enemy.pos,
+            col_walls, self.map.spawn,
+            function(i, j)
+                if getmetatable(self.map.walls[i][j]) ~= Air then
+                    collides = true
+                end
+            end
+        )
+
+        if collides then
+            return
+        end
+
+        self.level.enemies_left = self.level.enemies_left - 1
+        self.enemies[#self.enemies + 1] = enemy
+    end
+
+    for i, enemy in ipairs(self.enemies) do
+        inspect{enemy, 'enemy' .. i}
     end
 end
 
