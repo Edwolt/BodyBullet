@@ -11,13 +11,13 @@ local function new(_, pos, kind)
 
     local self = {
         pos = pos,
-        t = 0,
         kind = kind,
+        k = 2,
         timer = timer.Timer(SETTINGS.MUSCLE_TIMING),
+        transition = 'none',
     }
 
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 
@@ -31,8 +31,7 @@ function M:draw(pos)
     local points = {}
     for i = 0, 1, 0.1 do
         points[#points + 1] = i
-        print(self:k())
-        points[#points + 1] = (math.sin(2 * i * math.pi) + 1) / self:k()
+        points[#points + 1] = (math.sin(2 * i * math.pi) + 1) / self.k
     end
 
     local width_before = love.graphics.getLineWidth()
@@ -44,12 +43,19 @@ function M:draw(pos)
     love.graphics.pop()
 end
 
-function M:k()
-    return 4 + 2 * math.sin(self.t)
-end
-
 function M:update(dt)
-    self.t = self.t + dt
+    self.timer:update(dt)
+
+    self.transition = 'none'
+    self.timer:clock(function()
+        if self.k == 2 then
+            self.k = 4
+            self.transition = 'contract'
+        else
+            self.k = 2
+            self.transition = 'relax'
+        end
+    end)
 end
 
 function M:collider()

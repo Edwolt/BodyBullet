@@ -4,13 +4,8 @@ local M = {}
 M.__index = M
 
 local function new(_, pos, size)
-    local self = {
-        pos = pos,
-        size = size,
-    }
-
-    setmetatable(self, M)
-    return self
+    local self = {pos = pos, size = size}
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 

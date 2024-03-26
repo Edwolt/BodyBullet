@@ -7,9 +7,7 @@ M.__index = M
 
 local function new(_, pos)
     local self = {}
-
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 

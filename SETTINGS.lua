@@ -1,16 +1,19 @@
 local Input = require'modules.Input'
+local Vec = require'modules.Vec'
 
 SETTINGS = {
     SPECIALKEY_COOLDOWN = 0.2,
-    SHOOT_COOLDOWN = 0.3,
+    SHOOT_COOLDOWN = 0.1,
     DASH_COOLDOWN = 3.0,
     MUSCLE_TIMING = 1.0,
     CLEAN_TIMING = 1.0,
+    IMPULSE_DURATION = 0.2,
+    BULLET_TIME_LIMIT = 0.7,
 
     CHARACTER_VELOCITY = 10,
     ENEMY_VELOCITY = 5,
     BULLET_VELOCITY = 15,
-    BULLET_TIME_LIMIT = 0.7,
+    IMPULSE_VELOCITY = Vec(0, 30),
 
     EVILNESS = 0.5,
 

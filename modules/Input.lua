@@ -26,8 +26,7 @@ local function new(_)
         shootPressed = false,
     }
 
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 

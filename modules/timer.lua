@@ -1,6 +1,28 @@
+--- Watch
+local Watch = {}
+Watch.__index = Watch
+
+local function new(_)
+    local self = {time = 0}
+
+    return setmetatable(self, T)
+end
+
+function Watch:update(dt)
+    self.time = self.time + dt
+end
+
+function Watch:reset()
+    self.time = 0
+end
+
+function Watch:decrease(value)
+    self.time = self.time - value
+end
+
 --- Interval Timer
-local T = {}
-T.__index = T
+local Timer = {}
+Timer.__index = Timer
 
 local function new(_, duration)
     local self = {
@@ -8,17 +30,16 @@ local function new(_, duration)
         duration = duration,
     }
 
-    setmetatable(self, T)
-    return self
+    return setmetatable(self, Timer)
 end
-setmetatable(T, {__call = new})
+setmetatable(Timer, {__call = new})
 
 
-function T:update(dt)
+function Timer:update(dt)
     self.time = self.time + dt
 end
 
-function T:clock(f, ...)
+function Timer:clock(f, ...)
     while self.time > self.duration do
         self.time = self.time - self.duration
         f(...)
@@ -26,8 +47,8 @@ function T:clock(f, ...)
 end
 
 --- Cool Down Timer
-local C = {}
-C.__index = C
+local CoolDown = {}
+CoolDown.__index = CoolDown
 
 local function new(_, duration)
     local self = {
@@ -36,18 +57,17 @@ local function new(_, duration)
         active = false,
     }
 
-    setmetatable(self, C)
-    return self
+    return setmetatable(self, CoolDown)
 end
-setmetatable(C, {__call = new})
+setmetatable(CoolDown, {__call = new})
 
-function C:update(dt)
+function CoolDown:update(dt)
     if self.active then
         self.time = self.time + dt
     end
 end
 
-function C:clock(f, ...)
+function CoolDown:clock(f, ...)
     if not self.active then
         f(...)
         self.time = 0
@@ -57,9 +77,41 @@ function C:clock(f, ...)
     end
 end
 
+--- Span Timer
+local Span = {}
+Span.__index = Span
+
+local function new(_, duration)
+    local self = {
+        time = 0,
+        duration = duration,
+        active = true,
+    }
+
+    return setmetatable(self, Span)
+end
+setmetatable(Span, {__call = new})
+
+function Span:update(dt)
+    if self.active then
+        self.time = self.time + dt
+    end
+end
+
+function Span:clock(f, ...)
+    if self.time < self.duration then
+        f(...)
+    else
+        self.active = false
+    end
+end
+
 return {
+    Watch = Watch,
     --- Interval Timer
-    Timer = T,
+    Timer = Timer,
     --- Cool Down Timer
-    CoolDown = C,
+    CoolDown = CoolDown,
+    -- CountDown
+    Span = Span,
 }

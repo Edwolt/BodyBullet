@@ -6,7 +6,7 @@ local M = {}
 M.__index = M
 
 local function new(_, pos)
-    local self = { pos = pos, }
+    local self = {pos = pos}
 
     return setmetatable(self, M)
 end
@@ -19,8 +19,8 @@ function M:draw(pos)
     love.graphics.push()
     love.graphics.translate(pos.x, pos.y)
 
-    love.graphics.setColor(colors.BLACK)
-    love.graphics.rectangle('fill', 0, 0, 1, 1)
+    love.graphics.getColor(colors.RED)
+    love.graphics.rectangle('fill', 0, 0, 10, 10)
 
     love.graphics.pop()
 end

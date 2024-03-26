@@ -3,9 +3,7 @@ local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
 local timer = require'modules.timer'
 
-local M = {
-    SIZE = Vec(0.1, 0.1),
-}
+local M = {SIZE = Vec(0.1, 0.1)}
 M.__index = M
 
 local function new(M, shooter_pos, direction, vel)
@@ -17,7 +15,6 @@ local function new(M, shooter_pos, direction, vel)
         vel = direction * SETTINGS.BULLET_VELOCITY
     end
 
-
     local self = {
         pos = shooter_pos,
         vel = vel,
@@ -25,8 +22,7 @@ local function new(M, shooter_pos, direction, vel)
         timer = timer.Timer(SETTINGS.BULLET_TIME_LIMIT),
     }
 
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 

@@ -1,6 +1,7 @@
 local colors = require'modules.colors'
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
+local timer = require'modules.timer'
 
 local Bullet = require'objects.Bullet'
 
@@ -14,10 +15,13 @@ local function new(_, pos, vel)
         dir = Vec(0, 0),
         health = 5,
         insideArea = true,
+        impulse = {
+            vel = Vec(0, 0),
+            timer = timer.Span(0),
+        },
     }
 
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 
@@ -56,6 +60,11 @@ function M:update(dt)
     else
         self.pos = self.pos - dt * self.vel * self.dir
     end
+
+    self.impulse.timer:update(dt)
+    self.impulse.timer:clock(function()
+        self.pos = self.pos + dt * self.impulse.vel
+    end)
 end
 
 function M:collider()
@@ -90,6 +99,11 @@ end
 
 function M:isAlive()
     return self.health > 0
+end
+
+function M:createImpulse(vel, duration)
+    self.impulse.vel = vel
+    self.impulse.timer = timer.Span(duration)
 end
 
 return M

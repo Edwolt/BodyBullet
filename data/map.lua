@@ -1,4 +1,5 @@
 local clone = require'utils.clone'
+local CheckPoint = require'objects.CheckPoint'
 
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
@@ -57,6 +58,7 @@ local M = {
             area = {
                 Collider(Vec(-14, -11), Vec(29, 28)),
             },
+            checkpoint = CheckPoint(Vec(0.5, 0.5)),
         },
     },
 }
@@ -66,6 +68,18 @@ function M:draw()
     for _, l in ipairs(self.tiles) do
         for _, tile in ipairs(l) do
             tile:draw()
+        end
+    end
+    dbg.log.exit'Map Draw'
+end
+
+function M:drawDistant()
+    dbg.log.enter'Map Draw'
+    for _, l in ipairs(self.tiles) do
+        for _, tile in ipairs(l) do
+            if getmetatable(tile) == Wall then
+                tile:draw()
+            end
         end
     end
     dbg.log.exit'Map Draw'

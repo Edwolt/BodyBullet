@@ -3,12 +3,11 @@ M.__index = M
 
 ----- Constructors -----
 local function new(_, x, y)
-    local self = {x = x, y = y}
-    assert(type(self.x) == 'number')
-    assert(type(self.y) == 'number')
+    assert(type(x) == 'number')
+    assert(type(y) == 'number')
 
-    setmetatable(self, M)
-    return self
+    local self = {x = x, y = y}
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 

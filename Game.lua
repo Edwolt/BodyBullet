@@ -1,4 +1,6 @@
 local clone = require'utils.clone'
+local Muscle = require'tiles.Muscle'
+local Stomach = require'objects.Stomach'
 
 local Input = SETTINGS.Input
 local Vec = require'modules.Vec'
@@ -22,7 +24,7 @@ local state = {
 }
 
 -- Planned Levels
--- [ ] Legs
+-- [X] Legs
 -- [ ] Stomach
 -- [ ] Heart (circulatory system)
 -- [ ] Brain
@@ -45,12 +47,29 @@ local function new(_)
     self.level = clone(self.map.levels[self.level_name])
     self.state.gameover = false
 
-    setmetatable(self, M)
-    return self
+    return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})
 
+function M:isCharacterInnerArea()
+    local collides = false
+    for _, col_area in ipairs(self.level.area) do
+        if self.character:collider():collision(col_area) then
+            collides = true
+        end
+    end
+    return collides
+end
+
 function M:draw()
+    if self:isCharacterInnerArea() then
+        self:drawNear()
+    else
+        self:drawDistant()
+    end
+end
+
+function M:drawNear()
     love.graphics.push()
 
     -- Centering camera
@@ -84,11 +103,14 @@ function M:drawDistant()
     love.graphics.push()
 
     -- Centering camera
-    love.graphics.translate(0, 5)
-    love.graphics.scale(0.08, 0.08)
+    love.graphics.scale(0.2, 0.2)
+    love.graphics.translate(-self.character.pos.x, -self.character.pos.y)
+    love.graphics.translate(-0.5, -0.5)
+    -- love.graphics.translate(0, 5)
+    -- love.graphics.scale(0.08, 0.08)
 
 
-    self.map:draw()
+    self.map:drawDistant()
     self.character:draw()
 
     for _, enemy in ipairs(self.enemies) do
@@ -102,7 +124,11 @@ function M:drawDistant()
         bullet:draw()
     end
 
-    self.aim:draw(self.character.pos + Vec.mousePosition())
+    -- self.aim:draw(self.character.pos + Vec.mousePosition())
+
+    inspect{self.level.checkpoint}
+    self.level.checkpoint:draw()
+
 
     if self.state.debug then
         self:drawDebug()
@@ -161,10 +187,13 @@ function M:keydown()
     Input:up(function() dir.y = dir.y - 1 end)
     self.character:move(dir:versor())
 
-    Input:shoot(function(pos)
-        self.bullets.character[#self.bullets.character + 1] =
-            self.character:shoot(pos + self.character.pos)
-    end)
+    -- Penalize going out area
+    if self:isCharacterInnerArea() then
+        Input:shoot(function(pos)
+            self.bullets.character[#self.bullets.character + 1] =
+                self.character:shoot(pos + self.character.pos)
+        end)
+    end
 end
 
 function M:update(dt)
@@ -198,7 +227,7 @@ function M:update(dt)
     -- Collision
     self:clean()
 
-    -- Character x Walls
+    -- Character x Tiles
     local col_character = Collider.getColliderList{self.character}
     local col_tiles = self.map.matrixColliders(self.map.tiles)
     local col_enemies = Collider.getColliderList(self.enemies)
@@ -208,6 +237,37 @@ function M:update(dt)
     local col_enemies_bullets = Collider.getColliderList(self.bullets.enemies)
     local col_area = self.level.area
 
+    local function avoidWall(obj, wall)
+        local pos_wall = wall.pos
+        local pos_obj = obj.pos
+        local delta = pos_obj - pos_wall
+
+        local iteration = 0
+        while obj:collider():collision(wall:collider()) do
+            obj.pos = obj.pos + 0.05 * delta
+            iteration = iteration + 1
+            if iteration > 1000 then break end
+        end
+    end
+
+    local function muscleImpulse(obj, muscle)
+        local VELOCITY = SETTINGS.IMPULSE_VELOCITY
+        local DURATION = SETTINGS.IMPULSE_DURATION
+        if muscle.transition == 'contract' then
+            if muscle.kind == 'down' then
+                obj:createImpulse(VELOCITY, DURATION)
+            else
+                obj:createImpulse(-VELOCITY, DURATION)
+            end
+        elseif muscle.transition == 'relax' then
+            if muscle.kind == 'down' then
+                obj:createImpulse(-VELOCITY, DURATION)
+            else
+                obj:createImpulse(VELOCITY, DURATION)
+            end
+        end
+    end
+
     for _, collisor in ipairs(col_character) do
         Collider.checkCollisionsNear(
             collisor, self.character.pos, col_tiles, self.map.spawn,
@@ -215,22 +275,14 @@ function M:update(dt)
                 local character = self.character
                 local tile = self.map.tiles[i][j]
 
-                if getmetatable(tile) ~= Wall then return end
-
-                local pos_tile = tile.pos
-                local pos_character = character.pos
-                local delta = pos_character - pos_tile
-
-                local iteration = 0
-                while character:collider():collision(tile:collider()) do
-                    character.pos = character.pos + 0.05 * delta
-                    iteration = iteration + 1
-                    if iteration > 1000 then
-                        break
-                    end
+                local meta = getmetatable(tile)
+                if meta == Wall then
+                    avoidWall(character, tile)
+                    dbg.print('Character collided with wall ' .. j)
+                elseif meta == Muscle then
+                    muscleImpulse(character, tile)
+                    dbg.print('Character impulsioned by muscle ' .. j)
                 end
-
-                dbg.print('Character collided with wall ' .. j)
             end
         )
     end
@@ -243,23 +295,14 @@ function M:update(dt)
                 local enemy = self.enemies[o]
                 local tile = self.map.tiles[i][j]
 
-                if getmetatable(tile) ~= Wall then return end
-                if not enemy:isAlive() then return end
-
-                local pos_tile = tile.pos
-                local pos_enemy = enemy.pos
-                local delta = pos_enemy - pos_tile
-
-                local iteration = 0
-                while enemy:collider():collision(tile:collider()) do
-                    enemy.pos = enemy.pos + 0.05 * delta
-                    iteration = iteration + 1
-                    if iteration > 1000 then
-                        break
-                    end
+                local meta = getmetatable(tile)
+                if meta == Wall then
+                    avoidWall(enemy, tile)
+                    dbg.print(('Enemy %d collided with wall %d'):format(i, j))
+                elseif meta == Muscle then
+                    muscleImpulse(enemy, tile)
+                    dbg.print(('Enemy %d impulsioned by muscle %d'):format(i, j))
                 end
-
-                dbg.print(('Enemy %d collided with wall %d'):format(i, j))
             end
         )
     end
@@ -272,10 +315,10 @@ function M:update(dt)
                 local bullet = self.bullets.character[o]
                 local tile = self.map.tiles[i][j]
 
-                if getmetatable(tile) ~= Wall then return end
-                if not bullet:isAlive() then return end
-
-                bullet:kill()
+                local meta = getmetatable(tile)
+                if meta == Wall then
+                    bullet:kill()
+                end
             end
         )
     end
@@ -288,13 +331,37 @@ function M:update(dt)
                 local bullet = self.bullets.enemies[o]
                 local tile = self.map.tiles[i][j]
 
-                if getmetatable(tile) ~= Wall then return end
-                if not bullet:isAlive() then return end
-
-                bullet:kill()
+                local meta = getmetatable(tile)
+                if meta == Wall then
+                    bullet:kill()
+                end
             end
         )
     end
+
+    -- Character Bullets x Enemies
+    Collider.checkCollisionsNtoM(
+        col_enemies, col_character_bullets,
+        function(i, j)
+            local enemy = self.enemies[i]
+            local bullet = self.bullets.character[j]
+
+            enemy:damage()
+            bullet:damage()
+        end
+    )
+
+    -- Enemies Bullets x Character
+    Collider.checkCollisionsNtoM(
+        col_character, col_enemies_bullets,
+        function(_, j)
+            local character = self.character
+            local bullet = self.bullets.enemies[j]
+
+            character:damage()
+            bullet:damage()
+        end
+    )
 
     -- Character x Enemies
     Collider.checkCollisionsNtoM(
@@ -372,6 +439,10 @@ function M:clean()
         self.bullets.enemies = cleanDead(self.bullets.enemies)
         self.enemies = cleanDead(self.enemies)
     end)
+end
+
+function M:isLevelConcluded()
+    return #self.enemies == 0 and self.level.enemies_left == 0
 end
 
 return M
