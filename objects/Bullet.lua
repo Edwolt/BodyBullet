@@ -7,6 +7,10 @@ local M = {SIZE = Vec(0.1, 0.1)}
 M.__index = M
 
 local function new(M, shooter_pos, direction, vel)
+    assert(shooter_pos ~= nil)
+    assert(direction ~= nil)
+
+    assert(direction ~= nil)
     direction = direction:versor()
 
     if vel ~= nil then

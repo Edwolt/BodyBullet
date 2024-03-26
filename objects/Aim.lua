@@ -5,7 +5,7 @@ local colors = require'modules.colors'
 local M = {}
 M.__index = M
 
-local function new(_, pos)
+local function new(_)
     local self = {}
     return setmetatable(self, M)
 end

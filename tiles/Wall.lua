@@ -6,8 +6,8 @@ local M = {}
 M.__index = M
 
 local function new(_, pos)
-    local self = { pos = pos, }
-
+    assert(pos ~= nil)
+    local self = {pos = pos}
     return setmetatable(self, M)
 end
 setmetatable(M, {__call = new})

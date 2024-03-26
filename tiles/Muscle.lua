@@ -7,6 +7,7 @@ local M = {}
 M.__index = M
 
 local function new(_, pos, kind)
+    assert(pos ~= nil)
     assert(kind == 'up' or kind == 'down')
 
     local self = {

@@ -9,6 +9,8 @@ local M = {}
 M.__index = M
 
 local function new(_, pos, vel)
+    assert(pos ~= nil)
+
     local self = {
         pos = pos,
         vel = vel or SETTINGS.ENEMY_VELOCITY,

@@ -4,7 +4,6 @@ Watch.__index = Watch
 
 local function new(_)
     local self = {time = 0}
-
     return setmetatable(self, T)
 end
 
@@ -25,6 +24,8 @@ local Timer = {}
 Timer.__index = Timer
 
 local function new(_, duration)
+    assert(type(duration) == 'number')
+
     local self = {
         time = 0,
         duration = duration,
@@ -51,6 +52,8 @@ local CoolDown = {}
 CoolDown.__index = CoolDown
 
 local function new(_, duration)
+    assert(type(duration) == 'number')
+
     local self = {
         time = 0,
         duration = duration,
@@ -82,6 +85,8 @@ local Span = {}
 Span.__index = Span
 
 local function new(_, duration)
+    assert(type(duration) == 'number')
+
     local self = {
         time = 0,
         duration = duration,

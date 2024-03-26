@@ -1,5 +1,6 @@
 local clone = require'utils.clone'
 local CheckPoint = require'objects.CheckPoint'
+local Enemy = require'objects.Enemy'
 
 local Vec = require'modules.Vec'
 local Collider = require'modules.Collider'
@@ -48,18 +49,40 @@ for i = 1, n do
     end
 end
 
+local function repeatList(val, tab)
+    local res = {}
+    for _ = 1, val do
+        for _, cell in ipairs(tab) do
+            res[#res + 1] = cell
+        end
+    end
+    return res
+end
+
 local M = {
     spawn = spawn,
     tiles = tiles,
     levels = {
-        legs = {
-            enemies_left = 30,
-            max_enemies = 10,
-            area = {
-                Collider(Vec(-14, -11), Vec(29, 28)),
-            },
-            checkpoint = CheckPoint(Vec(0.5, 0.5)),
-        },
+        -- Making a function avoid changing values
+        legs = function()
+            return {
+                enemies = {
+                    i = 1,
+                    max = 10,
+                    list = repeatList(30, {Enemy}),
+                },
+                area = {
+                    Collider(Vec(-14, -11), Vec(29, 28)),
+                },
+                checkpoint = CheckPoint(Vec(0.5, 0.5)),
+            }
+        end,
+        stomach = function()
+            return {
+                enemies_left = 30,
+                max_enemies = 10,
+            }
+        end,
     },
 }
 

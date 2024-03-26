@@ -14,6 +14,8 @@ return {
 
     WHITE = hex(0xaaaaaa),
     BLACK = hex(0x000000),
+    GRAY = hex(0x666666),
+
     RED = hex(0xff0000),
     GREEN = hex(0x00ff00),
     BLUE = hex(0x0000ff),

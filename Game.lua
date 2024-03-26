@@ -1,6 +1,4 @@
-local clone = require'utils.clone'
 local Muscle = require'tiles.Muscle'
-local Stomach = require'objects.Stomach'
 
 local Input = SETTINGS.Input
 local Vec = require'modules.Vec'
@@ -11,6 +9,7 @@ local timer = require'modules.timer'
 local Character = require'objects.Character'
 local Enemy = require'objects.Enemy'
 local Aim = require'objects.Aim'
+local Stomach = require'objects.Stomach'
 
 local Wall = require'tiles.Wall'
 
@@ -23,6 +22,7 @@ local state = {
     gameover = false,
 }
 
+local stomach = Stomach()
 -- Planned Levels
 -- [X] Legs
 -- [ ] Stomach
@@ -44,7 +44,7 @@ local function new(_)
             clean = timer.Timer(SETTINGS.CLEAN_TIMING),
         },
     }
-    self.level = clone(self.map.levels[self.level_name])
+    self.level = self.map.levels[self.level_name]()
     self.state.gameover = false
 
     return setmetatable(self, M)
@@ -110,6 +110,7 @@ function M:drawDistant()
     -- love.graphics.scale(0.08, 0.08)
 
 
+    stomach:draw()
     self.map:drawDistant()
     self.character:draw()
 
@@ -128,7 +129,6 @@ function M:drawDistant()
 
     inspect{self.level.checkpoint}
     self.level.checkpoint:draw()
-
 
     if self.state.debug then
         self:drawDebug()
@@ -394,11 +394,14 @@ function M:update(dt)
 
 
     -- Spwaning enemies
-    while self.level.enemies_left > 0 and #self.enemies < self.level.max_enemies do
+    local l_enemies = self.level.enemies
+    while l_enemies.i <= #l_enemies.list and #self.enemies < l_enemies.max do
         local randidx = love.math.random(#self.level.area)
         local randarea = self.level.area[randidx]
 
-        local enemy = Enemy(randarea:randomPoint())
+        local Class = l_enemies.list[l_enemies.i]
+        inspect{Class, 'class'}
+        local enemy = Class(randarea:randomPoint())
         local collides = false
         Collider.checkCollisionsNear(
             enemy:collider(), enemy.pos,
@@ -414,7 +417,7 @@ function M:update(dt)
             return
         end
 
-        self.level.enemies_left = self.level.enemies_left - 1
+        l_enemies.i = l_enemies.i + 1
         self.enemies[#self.enemies + 1] = enemy
     end
 
@@ -442,7 +445,8 @@ function M:clean()
 end
 
 function M:isLevelConcluded()
-    return #self.enemies == 0 and self.level.enemies_left == 0
+    return #self.enemies == 0
+        and self.level.enemies.i > #self.level.enemies.list
 end
 
 return M

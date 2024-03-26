@@ -9,6 +9,8 @@ local M = {}
 M.__index = M
 
 local function new(_, pos)
+    assert(pos ~= nil)
+
     local self = {
         pos = pos,
         vel = Vec(0, 0),

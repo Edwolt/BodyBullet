@@ -4,6 +4,9 @@ local M = {}
 M.__index = M
 
 local function new(_, pos, size)
+    assert(pos ~= nil)
+    assert(size ~= nil)
+
     local self = {pos = pos, size = size}
     return setmetatable(self, M)
 end
